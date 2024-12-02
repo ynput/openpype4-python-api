@@ -1,0 +1,873 @@
+
+	
+
+<!DOCTYPE html>
+<html class="writer-html5 " lang="en" >
+<head>
+	<meta charset="utf-8">
+	
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	
+		<title>ayon_api.graphql_queries &mdash; ayon-python-api 1.0.11 documentation</title>
+	
+	
+	
+	<link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+	<link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+	<link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+	<link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+
+	
+	
+		<link rel="shortcut icon" href="../../_static/favicon.ico"/>
+	
+	
+	
+		<link rel="canonical" href="https://github.com/ynput/ayon-python-api_modules/ayon_api/graphql_queries.html"/>
+	
+
+	
+	<!--[if lt IE 9]>
+		<script src="../../_static/js/html5shiv.min.js"></script>
+	<![endif]-->
+	
+		
+			<script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+				<script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+				<script src="../../_static/jquery.js"></script>
+				<script src="../../_static/underscore.js"></script>
+				<script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+				<script src="../../_static/doctools.js"></script>
+				<script src="../../_static/sphinx_highlight.js"></script>
+		
+		<script type="text/javascript" src="../../_static/js/theme.js"></script>
+
+		
+		<link rel="index" title="Index" href="../../genindex.html" />
+		<link rel="search" title="Search" href="../../search.html" /> 
+</head>
+<body class="wy-body-for-nav">
+
+
+	 
+	<div class="wy-grid-for-nav">
+		
+		<nav data-toggle="wy-nav-shift" class="wy-nav-side">
+			<div class="wy-side-scroll">
+				<div class="wy-side-nav-search">
+					
+						<div class="brand">
+							<a href="../../index.html">
+							
+								<img src="../../_static/AYON_blackG_dot.svg" class="logo" alt="Logo"/>
+							
+							</a>
+						</div>
+						
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+					
+				</div>
+				
+				<div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+					
+						
+						
+							
+						
+						
+							<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../modules.html">ayon_api</a></li>
+</ul>
+
+						
+					
+				</div>
+				
+			</div>
+		</nav>
+
+		<section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+			
+			<nav class="wy-nav-top" aria-label="top navigation">
+			
+				<i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+				<a href="../../index.html">
+					
+						<img src="../../_static/AYON_blackG_dot.svg" class="logo" alt="Logo"/>
+					
+				</a>
+			
+			</nav>
+
+
+			<div class="wy-nav-content">
+				
+				<div class="rst-content">
+				
+					<div role="navigation" aria-label="breadcrumbs navigation">
+
+	<ul class="wy-breadcrumbs">
+		
+			
+				<li><a href="../../index.html">ayon-python-api</a> ⁄&nbsp;</li>
+				
+					<li><a href="../index.html">Module code</a> ⁄&nbsp;</li>
+				
+				<li><a href="">ayon_api.graphql_queries</a></li>
+			
+		
+		
+			<li class="wy-breadcrumbs-aside">
+			
+				<a href="https://github.com/ynput/ayon-python-api" class="fa fa-github-alt"></a>
+			
+			</li>
+		
+	</ul>
+
+</div>
+					<div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+					 <div itemprop="articleBody">
+						
+  <h1>Source code for ayon_api.graphql_queries</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">collections</span>
+
+<span class="kn">from</span> <span class="nn">.constants</span> <span class="kn">import</span> <span class="n">DEFAULT_LINK_FIELDS</span>
+<span class="kn">from</span> <span class="nn">.graphql</span> <span class="kn">import</span> <span class="n">FIELD_VALUE</span><span class="p">,</span> <span class="n">GraphQlQuery</span><span class="p">,</span> <span class="n">fields_to_dict</span>
+
+
+<div class="viewcode-block" id="add_links_fields"><a class="viewcode-back" href="../../ayon_api.graphql_queries.html#ayon_api.graphql_queries.add_links_fields">[docs]</a><span class="k">def</span> <span class="nf">add_links_fields</span><span class="p">(</span><span class="n">entity_field</span><span class="p">,</span> <span class="n">nested_fields</span><span class="p">):</span>
+    <span class="k">if</span> <span class="s2">&quot;links&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">nested_fields</span><span class="p">:</span>
+        <span class="k">return</span>
+    <span class="n">links_fields</span> <span class="o">=</span> <span class="n">nested_fields</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;links&quot;</span><span class="p">)</span>
+
+    <span class="n">link_edge_fields</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">DEFAULT_LINK_FIELDS</span><span class="p">)</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">links_fields</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
+        <span class="n">simple_fields</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">links_fields</span><span class="p">)</span>
+        <span class="n">simple_variant</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">simple_fields</span> <span class="o">-</span> <span class="n">link_edge_fields</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">simple_variant</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="n">simple_fields</span> <span class="o">=</span> <span class="n">link_edge_fields</span>
+
+    <span class="n">link_field</span> <span class="o">=</span> <span class="n">entity_field</span><span class="o">.</span><span class="n">add_field_with_edges</span><span class="p">(</span><span class="s2">&quot;links&quot;</span><span class="p">)</span>
+
+    <span class="n">link_name_var</span> <span class="o">=</span> <span class="n">link_field</span><span class="o">.</span><span class="n">add_variable</span><span class="p">(</span><span class="s2">&quot;linkNames&quot;</span><span class="p">,</span> <span class="s2">&quot;[String!]&quot;</span><span class="p">)</span>
+    <span class="n">link_name_regex_var</span> <span class="o">=</span> <span class="n">link_field</span><span class="o">.</span><span class="n">add_variable</span><span class="p">(</span><span class="s2">&quot;linkNameRegex&quot;</span><span class="p">,</span> <span class="s2">&quot;String!&quot;</span><span class="p">)</span>
+    <span class="n">link_type_var</span> <span class="o">=</span> <span class="n">link_field</span><span class="o">.</span><span class="n">add_variable</span><span class="p">(</span><span class="s2">&quot;linkTypes&quot;</span><span class="p">,</span> <span class="s2">&quot;[String!]&quot;</span><span class="p">)</span>
+    <span class="n">link_dir_var</span> <span class="o">=</span> <span class="n">link_field</span><span class="o">.</span><span class="n">add_variable</span><span class="p">(</span><span class="s2">&quot;linkDirection&quot;</span><span class="p">,</span> <span class="s2">&quot;String!&quot;</span><span class="p">)</span>
+    <span class="n">link_field</span><span class="o">.</span><span class="n">set_filter</span><span class="p">(</span><span class="s2">&quot;names&quot;</span><span class="p">,</span> <span class="n">link_name_var</span><span class="p">)</span>
+    <span class="n">link_field</span><span class="o">.</span><span class="n">set_filter</span><span class="p">(</span><span class="s2">&quot;nameEx&quot;</span><span class="p">,</span> <span class="n">link_name_regex_var</span><span class="p">)</span>
+    <span class="n">link_field</span><span class="o">.</span><span class="n">set_filter</span><span class="p">(</span><span class="s2">&quot;linkTypes&quot;</span><span class="p">,</span> <span class="n">link_type_var</span><span class="p">)</span>
+    <span class="n">link_field</span><span class="o">.</span><span class="n">set_filter</span><span class="p">(</span><span class="s2">&quot;direction&quot;</span><span class="p">,</span> <span class="n">link_dir_var</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">simple_variant</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">simple_fields</span><span class="p">:</span>
+            <span class="n">link_field</span><span class="o">.</span><span class="n">add_edge_field</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
+        <span class="k">return</span>
+
+    <span class="n">query_queue</span> <span class="o">=</span> <span class="n">collections</span><span class="o">.</span><span class="n">deque</span><span class="p">()</span>
+    <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">links_fields</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="k">if</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">link_edge_fields</span><span class="p">:</span>
+            <span class="n">link_field</span><span class="o">.</span><span class="n">add_edge_field</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
+            <span class="k">continue</span>
+        <span class="n">query_queue</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">link_field</span><span class="p">))</span>
+
+    <span class="k">while</span> <span class="n">query_queue</span><span class="p">:</span>
+        <span class="n">item</span> <span class="o">=</span> <span class="n">query_queue</span><span class="o">.</span><span class="n">popleft</span><span class="p">()</span>
+        <span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">parent</span> <span class="o">=</span> <span class="n">item</span>
+        <span class="n">field</span> <span class="o">=</span> <span class="n">parent</span><span class="o">.</span><span class="n">add_field</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">value</span> <span class="ow">is</span> <span class="n">FIELD_VALUE</span><span class="p">:</span>
+            <span class="k">continue</span>
+
+        <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">value</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="n">query_queue</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">k</span><span class="p">,</span> <span class="n">v</span><span class="p">,</span> <span class="n">field</span><span class="p">))</span></div>
+
+
+<div class="viewcode-block" id="project_graphql_query"><a class="viewcode-back" href="../../ayon_api.graphql_queries.html#ayon_api.graphql_queries.project_graphql_query">[docs]</a><span class="k">def</span> <span class="nf">project_graphql_query</span><span class="p">(</span><span class="n">fields</span><span class="p">):</span>
+    <span class="n">query</span> <span class="o">=</span> <span class="n">GraphQlQuery</span><span class="p">(</span><span class="s2">&quot;ProjectQuery&quot;</span><span class="p">)</span>
+    <span class="n">project_name_var</span> <span class="o">=</span> <span class="n">query</span><span class="o">.</span><span class="n">add_variable</span><span class="p">(</span><span class="s2">&quot;projectName&quot;</span><span class="p">,</span> <span class="s2">&quot;String!&quot;</span><span class="p">)</span>
+    <span class="n">project_field</span> <span class="o">=</span> <span class="n">query</span><span class="o">.</span><span class="n">add_field</span><span class="p">(</span><span class="s2">&quot;project&quot;</span><span class="p">)</span>
+    <span class="n">project_field</span><span class="o">.</span><span class="n">set_filter</span><span class="p">(</span><span class="s2">&quot;name&quot;</span><span class="p">,</span> <span class="n">project_name_var</span><span class="p">)</span>
+
+    <span class="n">nested_fields</span> <span class="o">=</span> <span class="n">fields_to_dict</span><span class="p">(</span><span class="n">fields</span><span class="p">)</span>
+
+    <span class="n">query_queue</span> <span class="o">=</span> <span class="n">collections</span><span class="o">.</span><span class="n">deque</span><span class="p">()</span>
+    <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">nested_fields</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="n">query_queue</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">project_field</span><span class="p">))</span>
+
+    <span class="k">while</span> <span class="n">query_queue</span><span class="p">:</span>
+        <span class="n">item</span> <span class="o">=</span> <span class="n">query_queue</span><span class="o">.</span><span class="n">popleft</span><span class="p">()</span>
+        <span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">parent</span> <span class="o">=</span> <span class="n">item</span>
+        <span class="n">field</span> <span class="o">=</span> <span class="n">parent</span><span class="o">.</span><span class="n">add_field</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">value</span> <span class="ow">is</span> <span class="n">FIELD_VALUE</span><span class="p">:</span>
+            <span class="k">continue</span>
+
+        <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">value</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="n">query_queue</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">k</span><span class="p">,</span> <span class="n">v</span><span class="p">,</span> <span class="n">field</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">query</span></div>
+
+
+<div class="viewcode-block" id="projects_graphql_query"><a class="viewcode-back" href="../../ayon_api.graphql_queries.html#ayon_api.graphql_queries.projects_graphql_query">[docs]</a><span class="k">def</span> <span class="nf">projects_graphql_query</span><span class="p">(</span><span class="n">fields</span><span class="p">):</span>
+    <span class="n">query</span> <span class="o">=</span> <span class="n">GraphQlQuery</span><span class="p">(</span><span class="s2">&quot;ProjectsQuery&quot;</span><span class="p">)</span>
+    <span class="n">projects_field</span> <span class="o">=</span> <span class="n">query</span><span class="o">.</span><span class="n">add_field_with_edges</span><span class="p">(</span><span class="s2">&quot;projects&quot;</span><span class="p">)</span>
+
+    <span class="n">nested_fields</span> <span class="o">=</span> <span class="n">fields_to_dict</span><span class="p">(</span><span class="n">fields</span><span class="p">)</span>
+
+    <span class="n">query_queue</span> <span class="o">=</span> <span class="n">collections</span><span class="o">.</span><span class="n">deque</span><span class="p">()</span>
+    <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">nested_fields</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="n">query_queue</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">projects_field</span><span class="p">))</span>
+
+    <span class="k">while</span> <span class="n">query_queue</span><span class="p">:</span>
+        <span class="n">item</span> <span class="o">=</span> <span class="n">query_queue</span><span class="o">.</span><span class="n">popleft</span><span class="p">()</span>
+        <span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">parent</span> <span class="o">=</span> <span class="n">item</span>
+        <span class="n">field</span> <span class="o">=</span> <span class="n">parent</span><span class="o">.</span><span class="n">add_field</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">value</span> <span class="ow">is</span> <span class="n">FIELD_VALUE</span><span class="p">:</span>
+            <span class="k">continue</span>
+
+        <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">value</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="n">query_queue</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">k</span><span class="p">,</span> <span class="n">v</span><span class="p">,</span> <span class="n">field</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">query</span></div>
+
+
+<div class="viewcode-block" id="product_types_query"><a class="viewcode-back" href="../../ayon_api.graphql_queries.html#ayon_api.graphql_queries.product_types_query">[docs]</a><span class="k">def</span> <span class="nf">product_types_query</span><span class="p">(</span><span class="n">fields</span><span class="p">):</span>
+    <span class="n">query</span> <span class="o">=</span> <span class="n">GraphQlQuery</span><span class="p">(</span><span class="s2">&quot;ProductTypes&quot;</span><span class="p">)</span>
+    <span class="n">product_types_field</span> <span class="o">=</span> <span class="n">query</span><span class="o">.</span><span class="n">add_field</span><span class="p">(</span><span class="s2">&quot;productTypes&quot;</span><span class="p">)</span>
+
+    <span class="n">nested_fields</span> <span class="o">=</span> <span class="n">fields_to_dict</span><span class="p">(</span><span class="n">fields</span><span class="p">)</span>
+
+    <span class="n">query_queue</span> <span class="o">=</span> <span class="n">collections</span><span class="o">.</span><span class="n">deque</span><span class="p">()</span>
+    <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">nested_fields</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="n">query_queue</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">product_types_field</span><span class="p">))</span>
+
+    <span class="k">while</span> <span class="n">query_queue</span><span class="p">:</span>
+        <span class="n">item</span> <span class="o">=</span> <span class="n">query_queue</span><span class="o">.</span><span class="n">popleft</span><span class="p">()</span>
+        <span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">parent</span> <span class="o">=</span> <span class="n">item</span>
+        <span class="n">field</span> <span class="o">=</span> <span class="n">parent</span><span class="o">.</span><span class="n">add_field</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">value</span> <span class="ow">is</span> <span class="n">FIELD_VALUE</span><span class="p">:</span>
+            <span class="k">continue</span>
+
+        <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">value</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="n">query_queue</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">k</span><span class="p">,</span> <span class="n">v</span><span class="p">,</span> <span class="n">field</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">query</span></div>
+
+
+<div class="viewcode-block" id="project_product_types_query"><a class="viewcode-back" href="../../ayon_api.graphql_queries.html#ayon_api.graphql_queries.project_product_types_query">[docs]</a><span class="k">def</span> <span class="nf">project_product_types_query</span><span class="p">(</span><span class="n">fields</span><span class="p">):</span>
+    <span class="n">query</span> <span class="o">=</span> <span class="n">GraphQlQuery</span><span class="p">(</span><span class="s2">&quot;ProjectProductTypes&quot;</span><span class="p">)</span>
+    <span class="n">project_query</span> <span class="o">=</span> <span class="n">query</span><span class="o">.</span><span class="n">add_field</span><span class="p">(</span><span class="s2">&quot;project&quot;</span><span class="p">)</span>
+    <span class="n">project_name_var</span> <span class="o">=</span> <span class="n">query</span><span class="o">.</span><span class="n">add_variable</span><span class="p">(</span><span class="s2">&quot;projectName&quot;</span><span class="p">,</span> <span class="s2">&quot;String!&quot;</span><span class="p">)</span>
+    <span class="n">project_query</span><span class="o">.</span><span class="n">set_filter</span><span class="p">(</span><span class="s2">&quot;name&quot;</span><span class="p">,</span> <span class="n">project_name_var</span><span class="p">)</span>
+    <span class="n">product_types_field</span> <span class="o">=</span> <span class="n">project_query</span><span class="o">.</span><span class="n">add_field</span><span class="p">(</span><span class="s2">&quot;productTypes&quot;</span><span class="p">)</span>
+    <span class="n">nested_fields</span> <span class="o">=</span> <span class="n">fields_to_dict</span><span class="p">(</span><span class="n">fields</span><span class="p">)</span>
+
+    <span class="n">query_queue</span> <span class="o">=</span> <span class="n">collections</span><span class="o">.</span><span class="n">deque</span><span class="p">()</span>
+    <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">nested_fields</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="n">query_queue</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">product_types_field</span><span class="p">))</span>
+
+    <span class="k">while</span> <span class="n">query_queue</span><span class="p">:</span>
+        <span class="n">item</span> <span class="o">=</span> <span class="n">query_queue</span><span class="o">.</span><span class="n">popleft</span><span class="p">()</span>
+        <span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">parent</span> <span class="o">=</span> <span class="n">item</span>
+        <span class="n">field</span> <span class="o">=</span> <span class="n">parent</span><span class="o">.</span><span class="n">add_field</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">value</span> <span class="ow">is</span> <span class="n">FIELD_VALUE</span><span class="p">:</span>
+            <span class="k">continue</span>
+
+        <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">value</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="n">query_queue</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">k</span><span class="p">,</span> <span class="n">v</span><span class="p">,</span> <span class="n">field</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">query</span></div>
+
+
+<div class="viewcode-block" id="folders_graphql_query"><a class="viewcode-back" href="../../ayon_api.graphql_queries.html#ayon_api.graphql_queries.folders_graphql_query">[docs]</a><span class="k">def</span> <span class="nf">folders_graphql_query</span><span class="p">(</span><span class="n">fields</span><span class="p">):</span>
+    <span class="n">query</span> <span class="o">=</span> <span class="n">GraphQlQuery</span><span class="p">(</span><span class="s2">&quot;FoldersQuery&quot;</span><span class="p">)</span>
+    <span class="n">project_name_var</span> <span class="o">=</span> <span class="n">query</span><span class="o">.</span><span class="n">add_variable</span><span class="p">(</span><span class="s2">&quot;projectName&quot;</span><span class="p">,</span> <span class="s2">&quot;String!&quot;</span><span class="p">)</span>
+    <span class="n">folder_ids_var</span> <span class="o">=</span> <span class="n">query</span><span class="o">.</span><span class="n">add_variable</span><span class="p">(</span><span class="s2">&quot;folderIds&quot;</span><span class="p">,</span> <span class="s2">&quot;[String!]&quot;</span><span class="p">)</span>
+    <span class="n">parent_folder_ids_var</span> <span class="o">=</span> <span class="n">query</span><span class="o">.</span><span class="n">add_variable</span><span class="p">(</span><span class="s2">&quot;parentFolderIds&quot;</span><span class="p">,</span> <span class="s2">&quot;[String!]&quot;</span><span class="p">)</span>
+    <span class="n">folder_paths_var</span> <span class="o">=</span> <span class="n">query</span><span class="o">.</span><span class="n">add_variable</span><span class="p">(</span><span class="s2">&quot;folderPaths&quot;</span><span class="p">,</span> <span class="s2">&quot;[String!]&quot;</span><span class="p">)</span>
+    <span class="n">folder_path_regex_var</span> <span class="o">=</span> <span class="n">query</span><span class="o">.</span><span class="n">add_variable</span><span class="p">(</span><span class="s2">&quot;folderPathRegex&quot;</span><span class="p">,</span> <span class="s2">&quot;String!&quot;</span><span class="p">)</span>
+    <span class="n">folder_names_var</span> <span class="o">=</span> <span class="n">query</span><span class="o">.</span><span class="n">add_variable</span><span class="p">(</span><span class="s2">&quot;folderNames&quot;</span><span class="p">,</span> <span class="s2">&quot;[String!]&quot;</span><span class="p">)</span>
+    <span class="n">folder_types_var</span> <span class="o">=</span> <span class="n">query</span><span class="o">.</span><span class="n">add_variable</span><span class="p">(</span><span class="s2">&quot;folderTypes&quot;</span><span class="p">,</span> <span class="s2">&quot;[String!]&quot;</span><span class="p">)</span>
+    <span class="n">has_products_var</span> <span class="o">=</span> <span class="n">query</span><span class="o">.</span><span class="n">add_variable</span><span class="p">(</span><span class="s2">&quot;folderHasProducts&quot;</span><span class="p">,</span> <span class="s2">&quot;Boolean!&quot;</span><span class="p">)</span>
+    <span class="n">has_tasks_var</span> <span class="o">=</span> <span class="n">query</span><span class="o">.</span><span class="n">add_variable</span><span class="p">(</span><span class="s2">&quot;folderHasTasks&quot;</span><span class="p">,</span> <span class="s2">&quot;Boolean!&quot;</span><span class="p">)</span>
+    <span class="n">has_links_var</span> <span class="o">=</span> <span class="n">query</span><span class="o">.</span><span class="n">add_variable</span><span class="p">(</span><span class="s2">&quot;folderHasLinks&quot;</span><span class="p">,</span> <span class="s2">&quot;HasLinksFilter&quot;</span><span class="p">)</span>
+    <span class="n">has_children_var</span> <span class="o">=</span> <span class="n">query</span><span class="o">.</span><span class="n">add_variable</span><span class="p">(</span><span class="s2">&quot;folderHasChildren&quot;</span><span class="p">,</span> <span class="s2">&quot;Boolean!&quot;</span><span class="p">)</span>
+    <span class="n">statuses_var</span> <span class="o">=</span> <span class="n">query</span><span class="o">.</span><span class="n">add_variable</span><span class="p">(</span><span class="s2">&quot;folderStatuses&quot;</span><span class="p">,</span> <span class="s2">&quot;[String!]&quot;</span><span class="p">)</span>
+    <span class="n">folder_assignees_all_var</span> <span class="o">=</span> <span class="n">query</span><span class="o">.</span><span class="n">add_variable</span><span class="p">(</span>
+        <span class="s2">&quot;folderAssigneesAll&quot;</span><span class="p">,</span> <span class="s2">&quot;[String!]&quot;</span>
+    <span class="p">)</span>
+    <span class="n">tags_var</span> <span class="o">=</span> <span class="n">query</span><span class="o">.</span><span class="n">add_variable</span><span class="p">(</span><span class="s2">&quot;folderTags&quot;</span><span class="p">,</span> <span class="s2">&quot;[String!]&quot;</span><span class="p">)</span>
+
+    <span class="n">project_field</span> <span class="o">=</span> <span class="n">query</span><span class="o">.</span><span class="n">add_field</span><span class="p">(</span><span class="s2">&quot;project&quot;</span><span class="p">)</span>
+    <span class="n">project_field</span><span class="o">.</span><span class="n">set_filter</span><span class="p">(</span><span class="s2">&quot;name&quot;</span><span class="p">,</span> <span class="n">project_name_var</span><span class="p">)</span>
+
+    <span class="n">folders_field</span> <span class="o">=</span> <span class="n">project_field</span><span class="o">.</span><span class="n">add_field_with_edges</span><span class="p">(</span><span class="s2">&quot;folders&quot;</span><span class="p">)</span>
+    <span class="n">folders_field</span><span class="o">.</span><span class="n">set_filter</span><span class="p">(</span><span class="s2">&quot;ids&quot;</span><span class="p">,</span> <span class="n">folder_ids_var</span><span class="p">)</span>
+    <span class="n">folders_field</span><span class="o">.</span><span class="n">set_filter</span><span class="p">(</span><span class="s2">&quot;parentIds&quot;</span><span class="p">,</span> <span class="n">parent_folder_ids_var</span><span class="p">)</span>
+    <span class="n">folders_field</span><span class="o">.</span><span class="n">set_filter</span><span class="p">(</span><span class="s2">&quot;names&quot;</span><span class="p">,</span> <span class="n">folder_names_var</span><span class="p">)</span>
+    <span class="n">folders_field</span><span class="o">.</span><span class="n">set_filter</span><span class="p">(</span><span class="s2">&quot;paths&quot;</span><span class="p">,</span> <span class="n">folder_paths_var</span><span class="p">)</span>
+    <span class="n">folders_field</span><span class="o">.</span><span class="n">set_filter</span><span class="p">(</span><span class="s2">&quot;pathEx&quot;</span><span class="p">,</span> <span class="n">folder_path_regex_var</span><span class="p">)</span>
+    <span class="n">folders_field</span><span class="o">.</span><span class="n">set_filter</span><span class="p">(</span><span class="s2">&quot;folderTypes&quot;</span><span class="p">,</span> <span class="n">folder_types_var</span><span class="p">)</span>
+    <span class="n">folders_field</span><span class="o">.</span><span class="n">set_filter</span><span class="p">(</span><span class="s2">&quot;statuses&quot;</span><span class="p">,</span> <span class="n">statuses_var</span><span class="p">)</span>
+    <span class="n">folders_field</span><span class="o">.</span><span class="n">set_filter</span><span class="p">(</span><span class="s2">&quot;assignees&quot;</span><span class="p">,</span> <span class="n">folder_assignees_all_var</span><span class="p">)</span>
+    <span class="n">folders_field</span><span class="o">.</span><span class="n">set_filter</span><span class="p">(</span><span class="s2">&quot;tags&quot;</span><span class="p">,</span> <span class="n">tags_var</span><span class="p">)</span>
+    <span class="n">folders_field</span><span class="o">.</span><span class="n">set_filter</span><span class="p">(</span><span class="s2">&quot;hasProducts&quot;</span><span class="p">,</span> <span class="n">has_products_var</span><span class="p">)</span>
+    <span class="n">folders_field</span><span class="o">.</span><span class="n">set_filter</span><span class="p">(</span><span class="s2">&quot;hasTasks&quot;</span><span class="p">,</span> <span class="n">has_tasks_var</span><span class="p">)</span>
+    <span class="n">folders_field</span><span class="o">.</span><span class="n">set_filter</span><span class="p">(</span><span class="s2">&quot;hasLinks&quot;</span><span class="p">,</span> <span class="n">has_links_var</span><span class="p">)</span>
+    <span class="n">folders_field</span><span class="o">.</span><span class="n">set_filter</span><span class="p">(</span><span class="s2">&quot;hasChildren&quot;</span><span class="p">,</span> <span class="n">has_children_var</span><span class="p">)</span>
+
+    <span class="n">nested_fields</span> <span class="o">=</span> <span class="n">fields_to_dict</span><span class="p">(</span><span class="n">fields</span><span class="p">)</span>
+    <span class="n">add_links_fields</span><span class="p">(</span><span class="n">folders_field</span><span class="p">,</span> <span class="n">nested_fields</span><span class="p">)</span>
+
+    <span class="n">query_queue</span> <span class="o">=</span> <span class="n">collections</span><span class="o">.</span><span class="n">deque</span><span class="p">()</span>
+    <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">nested_fields</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="n">query_queue</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">folders_field</span><span class="p">))</span>
+
+    <span class="k">while</span> <span class="n">query_queue</span><span class="p">:</span>
+        <span class="n">item</span> <span class="o">=</span> <span class="n">query_queue</span><span class="o">.</span><span class="n">popleft</span><span class="p">()</span>
+        <span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">parent</span> <span class="o">=</span> <span class="n">item</span>
+        <span class="n">field</span> <span class="o">=</span> <span class="n">parent</span><span class="o">.</span><span class="n">add_field</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">value</span> <span class="ow">is</span> <span class="n">FIELD_VALUE</span><span class="p">:</span>
+            <span class="k">continue</span>
+
+        <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">value</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="n">query_queue</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">k</span><span class="p">,</span> <span class="n">v</span><span class="p">,</span> <span class="n">field</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">query</span></div>
+
+
+<div class="viewcode-block" id="tasks_graphql_query"><a class="viewcode-back" href="../../ayon_api.graphql_queries.html#ayon_api.graphql_queries.tasks_graphql_query">[docs]</a><span class="k">def</span> <span class="nf">tasks_graphql_query</span><span class="p">(</span><span class="n">fields</span><span class="p">):</span>
+    <span class="n">query</span> <span class="o">=</span> <span class="n">GraphQlQuery</span><span class="p">(</span><span class="s2">&quot;TasksQuery&quot;</span><span class="p">)</span>
+    <span class="n">project_name_var</span> <span class="o">=</span> <span class="n">query</span><span class="o">.</span><span class="n">add_variable</span><span class="p">(</span><span class="s2">&quot;projectName&quot;</span><span class="p">,</span> <span class="s2">&quot;String!&quot;</span><span class="p">)</span>
+    <span class="n">task_ids_var</span> <span class="o">=</span> <span class="n">query</span><span class="o">.</span><span class="n">add_variable</span><span class="p">(</span><span class="s2">&quot;taskIds&quot;</span><span class="p">,</span> <span class="s2">&quot;[String!]&quot;</span><span class="p">)</span>
+    <span class="n">task_names_var</span> <span class="o">=</span> <span class="n">query</span><span class="o">.</span><span class="n">add_variable</span><span class="p">(</span><span class="s2">&quot;taskNames&quot;</span><span class="p">,</span> <span class="s2">&quot;[String!]&quot;</span><span class="p">)</span>
+    <span class="n">task_types_var</span> <span class="o">=</span> <span class="n">query</span><span class="o">.</span><span class="n">add_variable</span><span class="p">(</span><span class="s2">&quot;taskTypes&quot;</span><span class="p">,</span> <span class="s2">&quot;[String!]&quot;</span><span class="p">)</span>
+    <span class="n">folder_ids_var</span> <span class="o">=</span> <span class="n">query</span><span class="o">.</span><span class="n">add_variable</span><span class="p">(</span><span class="s2">&quot;folderIds&quot;</span><span class="p">,</span> <span class="s2">&quot;[String!]&quot;</span><span class="p">)</span>
+    <span class="n">assignees_any_var</span> <span class="o">=</span> <span class="n">query</span><span class="o">.</span><span class="n">add_variable</span><span class="p">(</span><span class="s2">&quot;taskAssigneesAny&quot;</span><span class="p">,</span> <span class="s2">&quot;[String!]&quot;</span><span class="p">)</span>
+    <span class="n">assignees_all_var</span> <span class="o">=</span> <span class="n">query</span><span class="o">.</span><span class="n">add_variable</span><span class="p">(</span><span class="s2">&quot;taskAssigneesAll&quot;</span><span class="p">,</span> <span class="s2">&quot;[String!]&quot;</span><span class="p">)</span>
+    <span class="n">statuses_var</span> <span class="o">=</span> <span class="n">query</span><span class="o">.</span><span class="n">add_variable</span><span class="p">(</span><span class="s2">&quot;taskStatuses&quot;</span><span class="p">,</span> <span class="s2">&quot;[String!]&quot;</span><span class="p">)</span>
+    <span class="n">tags_var</span> <span class="o">=</span> <span class="n">query</span><span class="o">.</span><span class="n">add_variable</span><span class="p">(</span><span class="s2">&quot;taskTags&quot;</span><span class="p">,</span> <span class="s2">&quot;[String!]&quot;</span><span class="p">)</span>
+
+    <span class="n">project_field</span> <span class="o">=</span> <span class="n">query</span><span class="o">.</span><span class="n">add_field</span><span class="p">(</span><span class="s2">&quot;project&quot;</span><span class="p">)</span>
+    <span class="n">project_field</span><span class="o">.</span><span class="n">set_filter</span><span class="p">(</span><span class="s2">&quot;name&quot;</span><span class="p">,</span> <span class="n">project_name_var</span><span class="p">)</span>
+
+    <span class="n">tasks_field</span> <span class="o">=</span> <span class="n">project_field</span><span class="o">.</span><span class="n">add_field_with_edges</span><span class="p">(</span><span class="s2">&quot;tasks&quot;</span><span class="p">)</span>
+    <span class="n">tasks_field</span><span class="o">.</span><span class="n">set_filter</span><span class="p">(</span><span class="s2">&quot;ids&quot;</span><span class="p">,</span> <span class="n">task_ids_var</span><span class="p">)</span>
+    <span class="c1"># WARNING: At moment when this been created &#39;names&#39; filter is not supported</span>
+    <span class="n">tasks_field</span><span class="o">.</span><span class="n">set_filter</span><span class="p">(</span><span class="s2">&quot;names&quot;</span><span class="p">,</span> <span class="n">task_names_var</span><span class="p">)</span>
+    <span class="n">tasks_field</span><span class="o">.</span><span class="n">set_filter</span><span class="p">(</span><span class="s2">&quot;taskTypes&quot;</span><span class="p">,</span> <span class="n">task_types_var</span><span class="p">)</span>
+    <span class="n">tasks_field</span><span class="o">.</span><span class="n">set_filter</span><span class="p">(</span><span class="s2">&quot;folderIds&quot;</span><span class="p">,</span> <span class="n">folder_ids_var</span><span class="p">)</span>
+    <span class="n">tasks_field</span><span class="o">.</span><span class="n">set_filter</span><span class="p">(</span><span class="s2">&quot;assigneesAny&quot;</span><span class="p">,</span> <span class="n">assignees_any_var</span><span class="p">)</span>
+    <span class="n">tasks_field</span><span class="o">.</span><span class="n">set_filter</span><span class="p">(</span><span class="s2">&quot;assignees&quot;</span><span class="p">,</span> <span class="n">assignees_all_var</span><span class="p">)</span>
+    <span class="n">tasks_field</span><span class="o">.</span><span class="n">set_filter</span><span class="p">(</span><span class="s2">&quot;statuses&quot;</span><span class="p">,</span> <span class="n">statuses_var</span><span class="p">)</span>
+    <span class="n">tasks_field</span><span class="o">.</span><span class="n">set_filter</span><span class="p">(</span><span class="s2">&quot;tags&quot;</span><span class="p">,</span> <span class="n">tags_var</span><span class="p">)</span>
+
+    <span class="n">nested_fields</span> <span class="o">=</span> <span class="n">fields_to_dict</span><span class="p">(</span><span class="n">fields</span><span class="p">)</span>
+    <span class="n">add_links_fields</span><span class="p">(</span><span class="n">tasks_field</span><span class="p">,</span> <span class="n">nested_fields</span><span class="p">)</span>
+
+    <span class="n">query_queue</span> <span class="o">=</span> <span class="n">collections</span><span class="o">.</span><span class="n">deque</span><span class="p">()</span>
+    <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">nested_fields</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="n">query_queue</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">tasks_field</span><span class="p">))</span>
+
+    <span class="k">while</span> <span class="n">query_queue</span><span class="p">:</span>
+        <span class="n">item</span> <span class="o">=</span> <span class="n">query_queue</span><span class="o">.</span><span class="n">popleft</span><span class="p">()</span>
+        <span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">parent</span> <span class="o">=</span> <span class="n">item</span>
+        <span class="n">field</span> <span class="o">=</span> <span class="n">parent</span><span class="o">.</span><span class="n">add_field</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">value</span> <span class="ow">is</span> <span class="n">FIELD_VALUE</span><span class="p">:</span>
+            <span class="k">continue</span>
+
+        <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">value</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="n">query_queue</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">k</span><span class="p">,</span> <span class="n">v</span><span class="p">,</span> <span class="n">field</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">query</span></div>
+
+
+<div class="viewcode-block" id="tasks_by_folder_paths_graphql_query"><a class="viewcode-back" href="../../ayon_api.graphql_queries.html#ayon_api.graphql_queries.tasks_by_folder_paths_graphql_query">[docs]</a><span class="k">def</span> <span class="nf">tasks_by_folder_paths_graphql_query</span><span class="p">(</span><span class="n">fields</span><span class="p">):</span>
+    <span class="n">query</span> <span class="o">=</span> <span class="n">GraphQlQuery</span><span class="p">(</span><span class="s2">&quot;TasksByFolderPathQuery&quot;</span><span class="p">)</span>
+    <span class="n">project_name_var</span> <span class="o">=</span> <span class="n">query</span><span class="o">.</span><span class="n">add_variable</span><span class="p">(</span><span class="s2">&quot;projectName&quot;</span><span class="p">,</span> <span class="s2">&quot;String!&quot;</span><span class="p">)</span>
+    <span class="n">task_names_var</span> <span class="o">=</span> <span class="n">query</span><span class="o">.</span><span class="n">add_variable</span><span class="p">(</span><span class="s2">&quot;taskNames&quot;</span><span class="p">,</span> <span class="s2">&quot;[String!]&quot;</span><span class="p">)</span>
+    <span class="n">task_types_var</span> <span class="o">=</span> <span class="n">query</span><span class="o">.</span><span class="n">add_variable</span><span class="p">(</span><span class="s2">&quot;taskTypes&quot;</span><span class="p">,</span> <span class="s2">&quot;[String!]&quot;</span><span class="p">)</span>
+    <span class="n">folder_paths_var</span> <span class="o">=</span> <span class="n">query</span><span class="o">.</span><span class="n">add_variable</span><span class="p">(</span><span class="s2">&quot;folderPaths&quot;</span><span class="p">,</span> <span class="s2">&quot;[String!]&quot;</span><span class="p">)</span>
+    <span class="n">assignees_any_var</span> <span class="o">=</span> <span class="n">query</span><span class="o">.</span><span class="n">add_variable</span><span class="p">(</span><span class="s2">&quot;taskAssigneesAny&quot;</span><span class="p">,</span> <span class="s2">&quot;[String!]&quot;</span><span class="p">)</span>
+    <span class="n">assignees_all_var</span> <span class="o">=</span> <span class="n">query</span><span class="o">.</span><span class="n">add_variable</span><span class="p">(</span><span class="s2">&quot;taskAssigneesAll&quot;</span><span class="p">,</span> <span class="s2">&quot;[String!]&quot;</span><span class="p">)</span>
+    <span class="n">statuses_var</span> <span class="o">=</span> <span class="n">query</span><span class="o">.</span><span class="n">add_variable</span><span class="p">(</span><span class="s2">&quot;taskStatuses&quot;</span><span class="p">,</span> <span class="s2">&quot;[String!]&quot;</span><span class="p">)</span>
+    <span class="n">tags_var</span> <span class="o">=</span> <span class="n">query</span><span class="o">.</span><span class="n">add_variable</span><span class="p">(</span><span class="s2">&quot;taskTags&quot;</span><span class="p">,</span> <span class="s2">&quot;[String!]&quot;</span><span class="p">)</span>
+
+    <span class="n">project_field</span> <span class="o">=</span> <span class="n">query</span><span class="o">.</span><span class="n">add_field</span><span class="p">(</span><span class="s2">&quot;project&quot;</span><span class="p">)</span>
+    <span class="n">project_field</span><span class="o">.</span><span class="n">set_filter</span><span class="p">(</span><span class="s2">&quot;name&quot;</span><span class="p">,</span> <span class="n">project_name_var</span><span class="p">)</span>
+
+    <span class="n">folders_field</span> <span class="o">=</span> <span class="n">project_field</span><span class="o">.</span><span class="n">add_field_with_edges</span><span class="p">(</span><span class="s2">&quot;folders&quot;</span><span class="p">)</span>
+    <span class="n">folders_field</span><span class="o">.</span><span class="n">add_field</span><span class="p">(</span><span class="s2">&quot;path&quot;</span><span class="p">)</span>
+    <span class="n">folders_field</span><span class="o">.</span><span class="n">set_filter</span><span class="p">(</span><span class="s2">&quot;paths&quot;</span><span class="p">,</span> <span class="n">folder_paths_var</span><span class="p">)</span>
+
+    <span class="n">tasks_field</span> <span class="o">=</span> <span class="n">folders_field</span><span class="o">.</span><span class="n">add_field_with_edges</span><span class="p">(</span><span class="s2">&quot;tasks&quot;</span><span class="p">)</span>
+    <span class="c1"># WARNING: At moment when this been created &#39;names&#39; filter is not supported</span>
+    <span class="n">tasks_field</span><span class="o">.</span><span class="n">set_filter</span><span class="p">(</span><span class="s2">&quot;names&quot;</span><span class="p">,</span> <span class="n">task_names_var</span><span class="p">)</span>
+    <span class="n">tasks_field</span><span class="o">.</span><span class="n">set_filter</span><span class="p">(</span><span class="s2">&quot;taskTypes&quot;</span><span class="p">,</span> <span class="n">task_types_var</span><span class="p">)</span>
+    <span class="n">tasks_field</span><span class="o">.</span><span class="n">set_filter</span><span class="p">(</span><span class="s2">&quot;assigneesAny&quot;</span><span class="p">,</span> <span class="n">assignees_any_var</span><span class="p">)</span>
+    <span class="n">tasks_field</span><span class="o">.</span><span class="n">set_filter</span><span class="p">(</span><span class="s2">&quot;assignees&quot;</span><span class="p">,</span> <span class="n">assignees_all_var</span><span class="p">)</span>
+    <span class="n">tasks_field</span><span class="o">.</span><span class="n">set_filter</span><span class="p">(</span><span class="s2">&quot;statuses&quot;</span><span class="p">,</span> <span class="n">statuses_var</span><span class="p">)</span>
+    <span class="n">tasks_field</span><span class="o">.</span><span class="n">set_filter</span><span class="p">(</span><span class="s2">&quot;tags&quot;</span><span class="p">,</span> <span class="n">tags_var</span><span class="p">)</span>
+
+    <span class="n">nested_fields</span> <span class="o">=</span> <span class="n">fields_to_dict</span><span class="p">(</span><span class="n">fields</span><span class="p">)</span>
+    <span class="n">add_links_fields</span><span class="p">(</span><span class="n">tasks_field</span><span class="p">,</span> <span class="n">nested_fields</span><span class="p">)</span>
+
+    <span class="n">query_queue</span> <span class="o">=</span> <span class="n">collections</span><span class="o">.</span><span class="n">deque</span><span class="p">()</span>
+    <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">nested_fields</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="n">query_queue</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">tasks_field</span><span class="p">))</span>
+
+    <span class="k">while</span> <span class="n">query_queue</span><span class="p">:</span>
+        <span class="n">item</span> <span class="o">=</span> <span class="n">query_queue</span><span class="o">.</span><span class="n">popleft</span><span class="p">()</span>
+        <span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">parent</span> <span class="o">=</span> <span class="n">item</span>
+        <span class="n">field</span> <span class="o">=</span> <span class="n">parent</span><span class="o">.</span><span class="n">add_field</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">value</span> <span class="ow">is</span> <span class="n">FIELD_VALUE</span><span class="p">:</span>
+            <span class="k">continue</span>
+
+        <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">value</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="n">query_queue</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">k</span><span class="p">,</span> <span class="n">v</span><span class="p">,</span> <span class="n">field</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">query</span></div>
+
+
+<div class="viewcode-block" id="products_graphql_query"><a class="viewcode-back" href="../../ayon_api.graphql_queries.html#ayon_api.graphql_queries.products_graphql_query">[docs]</a><span class="k">def</span> <span class="nf">products_graphql_query</span><span class="p">(</span><span class="n">fields</span><span class="p">):</span>
+    <span class="n">query</span> <span class="o">=</span> <span class="n">GraphQlQuery</span><span class="p">(</span><span class="s2">&quot;ProductsQuery&quot;</span><span class="p">)</span>
+
+    <span class="n">project_name_var</span> <span class="o">=</span> <span class="n">query</span><span class="o">.</span><span class="n">add_variable</span><span class="p">(</span><span class="s2">&quot;projectName&quot;</span><span class="p">,</span> <span class="s2">&quot;String!&quot;</span><span class="p">)</span>
+    <span class="n">product_ids_var</span> <span class="o">=</span> <span class="n">query</span><span class="o">.</span><span class="n">add_variable</span><span class="p">(</span><span class="s2">&quot;productIds&quot;</span><span class="p">,</span> <span class="s2">&quot;[String!]&quot;</span><span class="p">)</span>
+    <span class="n">product_names_var</span> <span class="o">=</span> <span class="n">query</span><span class="o">.</span><span class="n">add_variable</span><span class="p">(</span><span class="s2">&quot;productNames&quot;</span><span class="p">,</span> <span class="s2">&quot;[String!]&quot;</span><span class="p">)</span>
+    <span class="n">folder_ids_var</span> <span class="o">=</span> <span class="n">query</span><span class="o">.</span><span class="n">add_variable</span><span class="p">(</span><span class="s2">&quot;folderIds&quot;</span><span class="p">,</span> <span class="s2">&quot;[String!]&quot;</span><span class="p">)</span>
+    <span class="n">product_types_var</span> <span class="o">=</span> <span class="n">query</span><span class="o">.</span><span class="n">add_variable</span><span class="p">(</span><span class="s2">&quot;productTypes&quot;</span><span class="p">,</span> <span class="s2">&quot;[String!]&quot;</span><span class="p">)</span>
+    <span class="n">product_name_regex_var</span> <span class="o">=</span> <span class="n">query</span><span class="o">.</span><span class="n">add_variable</span><span class="p">(</span><span class="s2">&quot;productNameRegex&quot;</span><span class="p">,</span> <span class="s2">&quot;String!&quot;</span><span class="p">)</span>
+    <span class="n">product_path_regex_var</span> <span class="o">=</span> <span class="n">query</span><span class="o">.</span><span class="n">add_variable</span><span class="p">(</span><span class="s2">&quot;productPathRegex&quot;</span><span class="p">,</span> <span class="s2">&quot;String!&quot;</span><span class="p">)</span>
+    <span class="n">statuses_var</span> <span class="o">=</span> <span class="n">query</span><span class="o">.</span><span class="n">add_variable</span><span class="p">(</span><span class="s2">&quot;productStatuses.&quot;</span><span class="p">,</span> <span class="s2">&quot;[String!]&quot;</span><span class="p">)</span>
+    <span class="n">tags_var</span> <span class="o">=</span> <span class="n">query</span><span class="o">.</span><span class="n">add_variable</span><span class="p">(</span><span class="s2">&quot;productTags.&quot;</span><span class="p">,</span> <span class="s2">&quot;[String!]&quot;</span><span class="p">)</span>
+
+    <span class="n">project_field</span> <span class="o">=</span> <span class="n">query</span><span class="o">.</span><span class="n">add_field</span><span class="p">(</span><span class="s2">&quot;project&quot;</span><span class="p">)</span>
+    <span class="n">project_field</span><span class="o">.</span><span class="n">set_filter</span><span class="p">(</span><span class="s2">&quot;name&quot;</span><span class="p">,</span> <span class="n">project_name_var</span><span class="p">)</span>
+
+    <span class="n">products_field</span> <span class="o">=</span> <span class="n">project_field</span><span class="o">.</span><span class="n">add_field_with_edges</span><span class="p">(</span><span class="s2">&quot;products&quot;</span><span class="p">)</span>
+    <span class="n">products_field</span><span class="o">.</span><span class="n">set_filter</span><span class="p">(</span><span class="s2">&quot;ids&quot;</span><span class="p">,</span> <span class="n">product_ids_var</span><span class="p">)</span>
+    <span class="n">products_field</span><span class="o">.</span><span class="n">set_filter</span><span class="p">(</span><span class="s2">&quot;names&quot;</span><span class="p">,</span> <span class="n">product_names_var</span><span class="p">)</span>
+    <span class="n">products_field</span><span class="o">.</span><span class="n">set_filter</span><span class="p">(</span><span class="s2">&quot;folderIds&quot;</span><span class="p">,</span> <span class="n">folder_ids_var</span><span class="p">)</span>
+    <span class="n">products_field</span><span class="o">.</span><span class="n">set_filter</span><span class="p">(</span><span class="s2">&quot;productTypes&quot;</span><span class="p">,</span> <span class="n">product_types_var</span><span class="p">)</span>
+    <span class="n">products_field</span><span class="o">.</span><span class="n">set_filter</span><span class="p">(</span><span class="s2">&quot;statuses&quot;</span><span class="p">,</span> <span class="n">statuses_var</span><span class="p">)</span>
+    <span class="n">products_field</span><span class="o">.</span><span class="n">set_filter</span><span class="p">(</span><span class="s2">&quot;tags&quot;</span><span class="p">,</span> <span class="n">tags_var</span><span class="p">)</span>
+    <span class="n">products_field</span><span class="o">.</span><span class="n">set_filter</span><span class="p">(</span><span class="s2">&quot;nameEx&quot;</span><span class="p">,</span> <span class="n">product_name_regex_var</span><span class="p">)</span>
+    <span class="n">products_field</span><span class="o">.</span><span class="n">set_filter</span><span class="p">(</span><span class="s2">&quot;pathEx&quot;</span><span class="p">,</span> <span class="n">product_path_regex_var</span><span class="p">)</span>
+
+    <span class="n">nested_fields</span> <span class="o">=</span> <span class="n">fields_to_dict</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">fields</span><span class="p">))</span>
+    <span class="n">add_links_fields</span><span class="p">(</span><span class="n">products_field</span><span class="p">,</span> <span class="n">nested_fields</span><span class="p">)</span>
+
+    <span class="n">query_queue</span> <span class="o">=</span> <span class="n">collections</span><span class="o">.</span><span class="n">deque</span><span class="p">()</span>
+    <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">nested_fields</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="n">query_queue</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">products_field</span><span class="p">))</span>
+
+    <span class="k">while</span> <span class="n">query_queue</span><span class="p">:</span>
+        <span class="n">item</span> <span class="o">=</span> <span class="n">query_queue</span><span class="o">.</span><span class="n">popleft</span><span class="p">()</span>
+        <span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">parent</span> <span class="o">=</span> <span class="n">item</span>
+        <span class="n">field</span> <span class="o">=</span> <span class="n">parent</span><span class="o">.</span><span class="n">add_field</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">value</span> <span class="ow">is</span> <span class="n">FIELD_VALUE</span><span class="p">:</span>
+            <span class="k">continue</span>
+
+        <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">value</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="n">query_queue</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">k</span><span class="p">,</span> <span class="n">v</span><span class="p">,</span> <span class="n">field</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">query</span></div>
+
+
+<div class="viewcode-block" id="versions_graphql_query"><a class="viewcode-back" href="../../ayon_api.graphql_queries.html#ayon_api.graphql_queries.versions_graphql_query">[docs]</a><span class="k">def</span> <span class="nf">versions_graphql_query</span><span class="p">(</span><span class="n">fields</span><span class="p">):</span>
+    <span class="n">query</span> <span class="o">=</span> <span class="n">GraphQlQuery</span><span class="p">(</span><span class="s2">&quot;VersionsQuery&quot;</span><span class="p">)</span>
+
+    <span class="n">project_name_var</span> <span class="o">=</span> <span class="n">query</span><span class="o">.</span><span class="n">add_variable</span><span class="p">(</span><span class="s2">&quot;projectName&quot;</span><span class="p">,</span> <span class="s2">&quot;String!&quot;</span><span class="p">)</span>
+    <span class="n">product_ids_var</span> <span class="o">=</span> <span class="n">query</span><span class="o">.</span><span class="n">add_variable</span><span class="p">(</span><span class="s2">&quot;productIds&quot;</span><span class="p">,</span> <span class="s2">&quot;[String!]&quot;</span><span class="p">)</span>
+    <span class="n">version_ids_var</span> <span class="o">=</span> <span class="n">query</span><span class="o">.</span><span class="n">add_variable</span><span class="p">(</span><span class="s2">&quot;versionIds&quot;</span><span class="p">,</span> <span class="s2">&quot;[String!]&quot;</span><span class="p">)</span>
+    <span class="n">versions_var</span> <span class="o">=</span> <span class="n">query</span><span class="o">.</span><span class="n">add_variable</span><span class="p">(</span><span class="s2">&quot;versions&quot;</span><span class="p">,</span> <span class="s2">&quot;[Int!]&quot;</span><span class="p">)</span>
+    <span class="n">hero_only_var</span> <span class="o">=</span> <span class="n">query</span><span class="o">.</span><span class="n">add_variable</span><span class="p">(</span><span class="s2">&quot;heroOnly&quot;</span><span class="p">,</span> <span class="s2">&quot;Boolean&quot;</span><span class="p">)</span>
+    <span class="n">latest_only_var</span> <span class="o">=</span> <span class="n">query</span><span class="o">.</span><span class="n">add_variable</span><span class="p">(</span><span class="s2">&quot;latestOnly&quot;</span><span class="p">,</span> <span class="s2">&quot;Boolean&quot;</span><span class="p">)</span>
+    <span class="n">hero_or_latest_only_var</span> <span class="o">=</span> <span class="n">query</span><span class="o">.</span><span class="n">add_variable</span><span class="p">(</span>
+        <span class="s2">&quot;heroOrLatestOnly&quot;</span><span class="p">,</span> <span class="s2">&quot;Boolean&quot;</span>
+    <span class="p">)</span>
+    <span class="n">statuses_var</span> <span class="o">=</span> <span class="n">query</span><span class="o">.</span><span class="n">add_variable</span><span class="p">(</span><span class="s2">&quot;versionStatuses&quot;</span><span class="p">,</span> <span class="s2">&quot;[String!]&quot;</span><span class="p">)</span>
+    <span class="n">tags_var</span> <span class="o">=</span> <span class="n">query</span><span class="o">.</span><span class="n">add_variable</span><span class="p">(</span><span class="s2">&quot;versionTags&quot;</span><span class="p">,</span> <span class="s2">&quot;[String!]&quot;</span><span class="p">)</span>
+
+    <span class="n">project_field</span> <span class="o">=</span> <span class="n">query</span><span class="o">.</span><span class="n">add_field</span><span class="p">(</span><span class="s2">&quot;project&quot;</span><span class="p">)</span>
+    <span class="n">project_field</span><span class="o">.</span><span class="n">set_filter</span><span class="p">(</span><span class="s2">&quot;name&quot;</span><span class="p">,</span> <span class="n">project_name_var</span><span class="p">)</span>
+
+    <span class="n">versions_field</span> <span class="o">=</span> <span class="n">project_field</span><span class="o">.</span><span class="n">add_field_with_edges</span><span class="p">(</span><span class="s2">&quot;versions&quot;</span><span class="p">)</span>
+    <span class="n">versions_field</span><span class="o">.</span><span class="n">set_filter</span><span class="p">(</span><span class="s2">&quot;ids&quot;</span><span class="p">,</span> <span class="n">version_ids_var</span><span class="p">)</span>
+    <span class="n">versions_field</span><span class="o">.</span><span class="n">set_filter</span><span class="p">(</span><span class="s2">&quot;productIds&quot;</span><span class="p">,</span> <span class="n">product_ids_var</span><span class="p">)</span>
+    <span class="n">versions_field</span><span class="o">.</span><span class="n">set_filter</span><span class="p">(</span><span class="s2">&quot;versions&quot;</span><span class="p">,</span> <span class="n">versions_var</span><span class="p">)</span>
+    <span class="n">versions_field</span><span class="o">.</span><span class="n">set_filter</span><span class="p">(</span><span class="s2">&quot;heroOnly&quot;</span><span class="p">,</span> <span class="n">hero_only_var</span><span class="p">)</span>
+    <span class="n">versions_field</span><span class="o">.</span><span class="n">set_filter</span><span class="p">(</span><span class="s2">&quot;latestOnly&quot;</span><span class="p">,</span> <span class="n">latest_only_var</span><span class="p">)</span>
+    <span class="n">versions_field</span><span class="o">.</span><span class="n">set_filter</span><span class="p">(</span><span class="s2">&quot;heroOrLatestOnly&quot;</span><span class="p">,</span> <span class="n">hero_or_latest_only_var</span><span class="p">)</span>
+    <span class="n">versions_field</span><span class="o">.</span><span class="n">set_filter</span><span class="p">(</span><span class="s2">&quot;statuses&quot;</span><span class="p">,</span> <span class="n">statuses_var</span><span class="p">)</span>
+    <span class="n">versions_field</span><span class="o">.</span><span class="n">set_filter</span><span class="p">(</span><span class="s2">&quot;tags&quot;</span><span class="p">,</span> <span class="n">tags_var</span><span class="p">)</span>
+
+    <span class="n">nested_fields</span> <span class="o">=</span> <span class="n">fields_to_dict</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">fields</span><span class="p">))</span>
+    <span class="n">add_links_fields</span><span class="p">(</span><span class="n">versions_field</span><span class="p">,</span> <span class="n">nested_fields</span><span class="p">)</span>
+
+    <span class="n">query_queue</span> <span class="o">=</span> <span class="n">collections</span><span class="o">.</span><span class="n">deque</span><span class="p">()</span>
+    <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">nested_fields</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="n">query_queue</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">versions_field</span><span class="p">))</span>
+
+    <span class="k">while</span> <span class="n">query_queue</span><span class="p">:</span>
+        <span class="n">item</span> <span class="o">=</span> <span class="n">query_queue</span><span class="o">.</span><span class="n">popleft</span><span class="p">()</span>
+        <span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">parent</span> <span class="o">=</span> <span class="n">item</span>
+        <span class="n">field</span> <span class="o">=</span> <span class="n">parent</span><span class="o">.</span><span class="n">add_field</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">value</span> <span class="ow">is</span> <span class="n">FIELD_VALUE</span><span class="p">:</span>
+            <span class="k">continue</span>
+
+        <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">value</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="n">query_queue</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">k</span><span class="p">,</span> <span class="n">v</span><span class="p">,</span> <span class="n">field</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">query</span></div>
+
+
+<div class="viewcode-block" id="representations_graphql_query"><a class="viewcode-back" href="../../ayon_api.graphql_queries.html#ayon_api.graphql_queries.representations_graphql_query">[docs]</a><span class="k">def</span> <span class="nf">representations_graphql_query</span><span class="p">(</span><span class="n">fields</span><span class="p">):</span>
+    <span class="n">query</span> <span class="o">=</span> <span class="n">GraphQlQuery</span><span class="p">(</span><span class="s2">&quot;RepresentationsQuery&quot;</span><span class="p">)</span>
+
+    <span class="n">project_name_var</span> <span class="o">=</span> <span class="n">query</span><span class="o">.</span><span class="n">add_variable</span><span class="p">(</span><span class="s2">&quot;projectName&quot;</span><span class="p">,</span> <span class="s2">&quot;String!&quot;</span><span class="p">)</span>
+    <span class="n">repre_ids_var</span> <span class="o">=</span> <span class="n">query</span><span class="o">.</span><span class="n">add_variable</span><span class="p">(</span><span class="s2">&quot;representationIds&quot;</span><span class="p">,</span> <span class="s2">&quot;[String!]&quot;</span><span class="p">)</span>
+    <span class="n">repre_names_var</span> <span class="o">=</span> <span class="n">query</span><span class="o">.</span><span class="n">add_variable</span><span class="p">(</span><span class="s2">&quot;representationNames&quot;</span><span class="p">,</span> <span class="s2">&quot;[String!]&quot;</span><span class="p">)</span>
+    <span class="n">version_ids_var</span> <span class="o">=</span> <span class="n">query</span><span class="o">.</span><span class="n">add_variable</span><span class="p">(</span><span class="s2">&quot;versionIds&quot;</span><span class="p">,</span> <span class="s2">&quot;[String!]&quot;</span><span class="p">)</span>
+    <span class="n">has_links_var</span> <span class="o">=</span> <span class="n">query</span><span class="o">.</span><span class="n">add_variable</span><span class="p">(</span>
+        <span class="s2">&quot;representationHasLinks&quot;</span><span class="p">,</span> <span class="s2">&quot;HasLinksFilter&quot;</span>
+    <span class="p">)</span>
+    <span class="n">statuses_var</span> <span class="o">=</span> <span class="n">query</span><span class="o">.</span><span class="n">add_variable</span><span class="p">(</span>
+        <span class="s2">&quot;representationStatuses&quot;</span><span class="p">,</span> <span class="s2">&quot;[String!]&quot;</span>
+    <span class="p">)</span>
+    <span class="n">tags_var</span> <span class="o">=</span> <span class="n">query</span><span class="o">.</span><span class="n">add_variable</span><span class="p">(</span>
+        <span class="s2">&quot;representationTags&quot;</span><span class="p">,</span> <span class="s2">&quot;[String!]&quot;</span>
+    <span class="p">)</span>
+
+    <span class="n">project_field</span> <span class="o">=</span> <span class="n">query</span><span class="o">.</span><span class="n">add_field</span><span class="p">(</span><span class="s2">&quot;project&quot;</span><span class="p">)</span>
+    <span class="n">project_field</span><span class="o">.</span><span class="n">set_filter</span><span class="p">(</span><span class="s2">&quot;name&quot;</span><span class="p">,</span> <span class="n">project_name_var</span><span class="p">)</span>
+
+    <span class="n">repres_field</span> <span class="o">=</span> <span class="n">project_field</span><span class="o">.</span><span class="n">add_field_with_edges</span><span class="p">(</span><span class="s2">&quot;representations&quot;</span><span class="p">)</span>
+    <span class="n">repres_field</span><span class="o">.</span><span class="n">set_filter</span><span class="p">(</span><span class="s2">&quot;ids&quot;</span><span class="p">,</span> <span class="n">repre_ids_var</span><span class="p">)</span>
+    <span class="n">repres_field</span><span class="o">.</span><span class="n">set_filter</span><span class="p">(</span><span class="s2">&quot;versionIds&quot;</span><span class="p">,</span> <span class="n">version_ids_var</span><span class="p">)</span>
+    <span class="n">repres_field</span><span class="o">.</span><span class="n">set_filter</span><span class="p">(</span><span class="s2">&quot;names&quot;</span><span class="p">,</span> <span class="n">repre_names_var</span><span class="p">)</span>
+    <span class="n">repres_field</span><span class="o">.</span><span class="n">set_filter</span><span class="p">(</span><span class="s2">&quot;hasLinks&quot;</span><span class="p">,</span> <span class="n">has_links_var</span><span class="p">)</span>
+    <span class="n">repres_field</span><span class="o">.</span><span class="n">set_filter</span><span class="p">(</span><span class="s2">&quot;statuses&quot;</span><span class="p">,</span> <span class="n">statuses_var</span><span class="p">)</span>
+    <span class="n">repres_field</span><span class="o">.</span><span class="n">set_filter</span><span class="p">(</span><span class="s2">&quot;tags&quot;</span><span class="p">,</span> <span class="n">tags_var</span><span class="p">)</span>
+
+    <span class="n">nested_fields</span> <span class="o">=</span> <span class="n">fields_to_dict</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">fields</span><span class="p">))</span>
+    <span class="n">add_links_fields</span><span class="p">(</span><span class="n">repres_field</span><span class="p">,</span> <span class="n">nested_fields</span><span class="p">)</span>
+
+    <span class="n">query_queue</span> <span class="o">=</span> <span class="n">collections</span><span class="o">.</span><span class="n">deque</span><span class="p">()</span>
+    <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">nested_fields</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="n">query_queue</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">repres_field</span><span class="p">))</span>
+
+    <span class="k">while</span> <span class="n">query_queue</span><span class="p">:</span>
+        <span class="n">item</span> <span class="o">=</span> <span class="n">query_queue</span><span class="o">.</span><span class="n">popleft</span><span class="p">()</span>
+        <span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">parent</span> <span class="o">=</span> <span class="n">item</span>
+        <span class="n">field</span> <span class="o">=</span> <span class="n">parent</span><span class="o">.</span><span class="n">add_field</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">value</span> <span class="ow">is</span> <span class="n">FIELD_VALUE</span><span class="p">:</span>
+            <span class="k">continue</span>
+
+        <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">value</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="n">query_queue</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">k</span><span class="p">,</span> <span class="n">v</span><span class="p">,</span> <span class="n">field</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">query</span></div>
+
+
+<div class="viewcode-block" id="representations_parents_qraphql_query"><a class="viewcode-back" href="../../ayon_api.graphql_queries.html#ayon_api.graphql_queries.representations_parents_qraphql_query">[docs]</a><span class="k">def</span> <span class="nf">representations_parents_qraphql_query</span><span class="p">(</span>
+    <span class="n">version_fields</span><span class="p">,</span> <span class="n">product_fields</span><span class="p">,</span> <span class="n">folder_fields</span>
+<span class="p">):</span>
+    <span class="n">query</span> <span class="o">=</span> <span class="n">GraphQlQuery</span><span class="p">(</span><span class="s2">&quot;RepresentationsParentsQuery&quot;</span><span class="p">)</span>
+
+    <span class="n">project_name_var</span> <span class="o">=</span> <span class="n">query</span><span class="o">.</span><span class="n">add_variable</span><span class="p">(</span><span class="s2">&quot;projectName&quot;</span><span class="p">,</span> <span class="s2">&quot;String!&quot;</span><span class="p">)</span>
+    <span class="n">repre_ids_var</span> <span class="o">=</span> <span class="n">query</span><span class="o">.</span><span class="n">add_variable</span><span class="p">(</span><span class="s2">&quot;representationIds&quot;</span><span class="p">,</span> <span class="s2">&quot;[String!]&quot;</span><span class="p">)</span>
+
+    <span class="n">project_field</span> <span class="o">=</span> <span class="n">query</span><span class="o">.</span><span class="n">add_field</span><span class="p">(</span><span class="s2">&quot;project&quot;</span><span class="p">)</span>
+    <span class="n">project_field</span><span class="o">.</span><span class="n">set_filter</span><span class="p">(</span><span class="s2">&quot;name&quot;</span><span class="p">,</span> <span class="n">project_name_var</span><span class="p">)</span>
+
+    <span class="n">repres_field</span> <span class="o">=</span> <span class="n">project_field</span><span class="o">.</span><span class="n">add_field_with_edges</span><span class="p">(</span><span class="s2">&quot;representations&quot;</span><span class="p">)</span>
+    <span class="n">repres_field</span><span class="o">.</span><span class="n">add_field</span><span class="p">(</span><span class="s2">&quot;id&quot;</span><span class="p">)</span>
+    <span class="n">repres_field</span><span class="o">.</span><span class="n">set_filter</span><span class="p">(</span><span class="s2">&quot;ids&quot;</span><span class="p">,</span> <span class="n">repre_ids_var</span><span class="p">)</span>
+    <span class="n">version_field</span> <span class="o">=</span> <span class="n">repres_field</span><span class="o">.</span><span class="n">add_field</span><span class="p">(</span><span class="s2">&quot;version&quot;</span><span class="p">)</span>
+
+    <span class="n">fields_queue</span> <span class="o">=</span> <span class="n">collections</span><span class="o">.</span><span class="n">deque</span><span class="p">()</span>
+    <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">fields_to_dict</span><span class="p">(</span><span class="n">version_fields</span><span class="p">)</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="n">fields_queue</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">version_field</span><span class="p">))</span>
+
+    <span class="n">product_field</span> <span class="o">=</span> <span class="n">version_field</span><span class="o">.</span><span class="n">add_field</span><span class="p">(</span><span class="s2">&quot;product&quot;</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">fields_to_dict</span><span class="p">(</span><span class="n">product_fields</span><span class="p">)</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="n">fields_queue</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">product_field</span><span class="p">))</span>
+
+    <span class="n">folder_field</span> <span class="o">=</span> <span class="n">product_field</span><span class="o">.</span><span class="n">add_field</span><span class="p">(</span><span class="s2">&quot;folder&quot;</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">fields_to_dict</span><span class="p">(</span><span class="n">folder_fields</span><span class="p">)</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="n">fields_queue</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">folder_field</span><span class="p">))</span>
+
+    <span class="k">while</span> <span class="n">fields_queue</span><span class="p">:</span>
+        <span class="n">item</span> <span class="o">=</span> <span class="n">fields_queue</span><span class="o">.</span><span class="n">popleft</span><span class="p">()</span>
+        <span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">parent</span> <span class="o">=</span> <span class="n">item</span>
+        <span class="n">field</span> <span class="o">=</span> <span class="n">parent</span><span class="o">.</span><span class="n">add_field</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">value</span> <span class="ow">is</span> <span class="n">FIELD_VALUE</span><span class="p">:</span>
+            <span class="k">continue</span>
+
+        <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">value</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="n">fields_queue</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">k</span><span class="p">,</span> <span class="n">v</span><span class="p">,</span> <span class="n">field</span><span class="p">))</span>
+
+    <span class="k">return</span> <span class="n">query</span></div>
+
+
+<div class="viewcode-block" id="representations_hierarchy_qraphql_query"><a class="viewcode-back" href="../../ayon_api.graphql_queries.html#ayon_api.graphql_queries.representations_hierarchy_qraphql_query">[docs]</a><span class="k">def</span> <span class="nf">representations_hierarchy_qraphql_query</span><span class="p">(</span>
+    <span class="n">folder_fields</span><span class="p">,</span>
+    <span class="n">task_fields</span><span class="p">,</span>
+    <span class="n">product_fields</span><span class="p">,</span>
+    <span class="n">version_fields</span><span class="p">,</span>
+    <span class="n">representation_fields</span><span class="p">,</span>
+<span class="p">):</span>
+    <span class="n">query</span> <span class="o">=</span> <span class="n">GraphQlQuery</span><span class="p">(</span><span class="s2">&quot;RepresentationsParentsQuery&quot;</span><span class="p">)</span>
+
+    <span class="n">project_name_var</span> <span class="o">=</span> <span class="n">query</span><span class="o">.</span><span class="n">add_variable</span><span class="p">(</span><span class="s2">&quot;projectName&quot;</span><span class="p">,</span> <span class="s2">&quot;String!&quot;</span><span class="p">)</span>
+    <span class="n">repre_ids_var</span> <span class="o">=</span> <span class="n">query</span><span class="o">.</span><span class="n">add_variable</span><span class="p">(</span><span class="s2">&quot;representationIds&quot;</span><span class="p">,</span> <span class="s2">&quot;[String!]&quot;</span><span class="p">)</span>
+
+    <span class="n">project_field</span> <span class="o">=</span> <span class="n">query</span><span class="o">.</span><span class="n">add_field</span><span class="p">(</span><span class="s2">&quot;project&quot;</span><span class="p">)</span>
+    <span class="n">project_field</span><span class="o">.</span><span class="n">set_filter</span><span class="p">(</span><span class="s2">&quot;name&quot;</span><span class="p">,</span> <span class="n">project_name_var</span><span class="p">)</span>
+
+    <span class="n">fields_queue</span> <span class="o">=</span> <span class="n">collections</span><span class="o">.</span><span class="n">deque</span><span class="p">()</span>
+
+    <span class="n">repres_field</span> <span class="o">=</span> <span class="n">project_field</span><span class="o">.</span><span class="n">add_field_with_edges</span><span class="p">(</span><span class="s2">&quot;representations&quot;</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">fields_to_dict</span><span class="p">(</span><span class="n">representation_fields</span><span class="p">)</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="n">fields_queue</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">repres_field</span><span class="p">))</span>
+
+    <span class="n">repres_field</span><span class="o">.</span><span class="n">set_filter</span><span class="p">(</span><span class="s2">&quot;ids&quot;</span><span class="p">,</span> <span class="n">repre_ids_var</span><span class="p">)</span>
+    <span class="n">version_field</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="k">if</span> <span class="n">folder_fields</span> <span class="ow">or</span> <span class="n">task_fields</span> <span class="ow">or</span> <span class="n">product_fields</span> <span class="ow">or</span> <span class="n">version_fields</span><span class="p">:</span>
+        <span class="n">version_field</span> <span class="o">=</span> <span class="n">repres_field</span><span class="o">.</span><span class="n">add_field</span><span class="p">(</span><span class="s2">&quot;version&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">version_fields</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">fields_to_dict</span><span class="p">(</span><span class="n">version_fields</span><span class="p">)</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                <span class="n">fields_queue</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">version_field</span><span class="p">))</span>
+
+    <span class="k">if</span> <span class="n">task_fields</span><span class="p">:</span>
+        <span class="n">task_field</span> <span class="o">=</span> <span class="n">version_field</span><span class="o">.</span><span class="n">add_field</span><span class="p">(</span><span class="s2">&quot;task&quot;</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">fields_to_dict</span><span class="p">(</span><span class="n">task_fields</span><span class="p">)</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="n">fields_queue</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">task_field</span><span class="p">))</span>
+
+    <span class="n">product_field</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="k">if</span> <span class="n">folder_fields</span> <span class="ow">or</span> <span class="n">product_fields</span><span class="p">:</span>
+        <span class="n">product_field</span> <span class="o">=</span> <span class="n">version_field</span><span class="o">.</span><span class="n">add_field</span><span class="p">(</span><span class="s2">&quot;product&quot;</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">fields_to_dict</span><span class="p">(</span><span class="n">product_fields</span><span class="p">)</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="n">fields_queue</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">product_field</span><span class="p">))</span>
+
+    <span class="k">if</span> <span class="n">folder_fields</span><span class="p">:</span>
+        <span class="n">folder_field</span> <span class="o">=</span> <span class="n">product_field</span><span class="o">.</span><span class="n">add_field</span><span class="p">(</span><span class="s2">&quot;folder&quot;</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">fields_to_dict</span><span class="p">(</span><span class="n">folder_fields</span><span class="p">)</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="n">fields_queue</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">folder_field</span><span class="p">))</span>
+
+    <span class="k">while</span> <span class="n">fields_queue</span><span class="p">:</span>
+        <span class="n">item</span> <span class="o">=</span> <span class="n">fields_queue</span><span class="o">.</span><span class="n">popleft</span><span class="p">()</span>
+        <span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">parent</span> <span class="o">=</span> <span class="n">item</span>
+        <span class="n">field</span> <span class="o">=</span> <span class="n">parent</span><span class="o">.</span><span class="n">add_field</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">value</span> <span class="ow">is</span> <span class="n">FIELD_VALUE</span><span class="p">:</span>
+            <span class="k">continue</span>
+
+        <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">value</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="n">fields_queue</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">k</span><span class="p">,</span> <span class="n">v</span><span class="p">,</span> <span class="n">field</span><span class="p">))</span>
+
+    <span class="k">return</span> <span class="n">query</span></div>
+
+
+<div class="viewcode-block" id="workfiles_info_graphql_query"><a class="viewcode-back" href="../../ayon_api.graphql_queries.html#ayon_api.graphql_queries.workfiles_info_graphql_query">[docs]</a><span class="k">def</span> <span class="nf">workfiles_info_graphql_query</span><span class="p">(</span><span class="n">fields</span><span class="p">):</span>
+    <span class="n">query</span> <span class="o">=</span> <span class="n">GraphQlQuery</span><span class="p">(</span><span class="s2">&quot;WorkfilesInfo&quot;</span><span class="p">)</span>
+    <span class="n">project_name_var</span> <span class="o">=</span> <span class="n">query</span><span class="o">.</span><span class="n">add_variable</span><span class="p">(</span><span class="s2">&quot;projectName&quot;</span><span class="p">,</span> <span class="s2">&quot;String!&quot;</span><span class="p">)</span>
+    <span class="n">workfiles_info_ids</span> <span class="o">=</span> <span class="n">query</span><span class="o">.</span><span class="n">add_variable</span><span class="p">(</span><span class="s2">&quot;workfileIds&quot;</span><span class="p">,</span> <span class="s2">&quot;[String!]&quot;</span><span class="p">)</span>
+    <span class="n">task_ids_var</span> <span class="o">=</span> <span class="n">query</span><span class="o">.</span><span class="n">add_variable</span><span class="p">(</span><span class="s2">&quot;taskIds&quot;</span><span class="p">,</span> <span class="s2">&quot;[String!]&quot;</span><span class="p">)</span>
+    <span class="n">paths_var</span> <span class="o">=</span> <span class="n">query</span><span class="o">.</span><span class="n">add_variable</span><span class="p">(</span><span class="s2">&quot;paths&quot;</span><span class="p">,</span> <span class="s2">&quot;[String!]&quot;</span><span class="p">)</span>
+    <span class="n">path_regex_var</span> <span class="o">=</span> <span class="n">query</span><span class="o">.</span><span class="n">add_variable</span><span class="p">(</span><span class="s2">&quot;workfilePathRegex&quot;</span><span class="p">,</span> <span class="s2">&quot;String!&quot;</span><span class="p">)</span>
+    <span class="n">has_links_var</span> <span class="o">=</span> <span class="n">query</span><span class="o">.</span><span class="n">add_variable</span><span class="p">(</span><span class="s2">&quot;workfilehasLinks&quot;</span><span class="p">,</span> <span class="s2">&quot;HasLinksFilter&quot;</span><span class="p">)</span>
+    <span class="n">statuses_var</span> <span class="o">=</span> <span class="n">query</span><span class="o">.</span><span class="n">add_variable</span><span class="p">(</span><span class="s2">&quot;workfileStatuses&quot;</span><span class="p">,</span> <span class="s2">&quot;[String!]&quot;</span><span class="p">)</span>
+    <span class="n">tags_var</span> <span class="o">=</span> <span class="n">query</span><span class="o">.</span><span class="n">add_variable</span><span class="p">(</span><span class="s2">&quot;workfileTags&quot;</span><span class="p">,</span> <span class="s2">&quot;[String!]&quot;</span><span class="p">)</span>
+
+    <span class="n">project_field</span> <span class="o">=</span> <span class="n">query</span><span class="o">.</span><span class="n">add_field</span><span class="p">(</span><span class="s2">&quot;project&quot;</span><span class="p">)</span>
+    <span class="n">project_field</span><span class="o">.</span><span class="n">set_filter</span><span class="p">(</span><span class="s2">&quot;name&quot;</span><span class="p">,</span> <span class="n">project_name_var</span><span class="p">)</span>
+
+    <span class="n">workfiles_field</span> <span class="o">=</span> <span class="n">project_field</span><span class="o">.</span><span class="n">add_field_with_edges</span><span class="p">(</span><span class="s2">&quot;workfiles&quot;</span><span class="p">)</span>
+    <span class="n">workfiles_field</span><span class="o">.</span><span class="n">set_filter</span><span class="p">(</span><span class="s2">&quot;ids&quot;</span><span class="p">,</span> <span class="n">workfiles_info_ids</span><span class="p">)</span>
+    <span class="n">workfiles_field</span><span class="o">.</span><span class="n">set_filter</span><span class="p">(</span><span class="s2">&quot;taskIds&quot;</span><span class="p">,</span> <span class="n">task_ids_var</span><span class="p">)</span>
+    <span class="n">workfiles_field</span><span class="o">.</span><span class="n">set_filter</span><span class="p">(</span><span class="s2">&quot;paths&quot;</span><span class="p">,</span> <span class="n">paths_var</span><span class="p">)</span>
+    <span class="n">workfiles_field</span><span class="o">.</span><span class="n">set_filter</span><span class="p">(</span><span class="s2">&quot;pathEx&quot;</span><span class="p">,</span> <span class="n">path_regex_var</span><span class="p">)</span>
+    <span class="n">workfiles_field</span><span class="o">.</span><span class="n">set_filter</span><span class="p">(</span><span class="s2">&quot;hasLinks&quot;</span><span class="p">,</span> <span class="n">has_links_var</span><span class="p">)</span>
+    <span class="n">workfiles_field</span><span class="o">.</span><span class="n">set_filter</span><span class="p">(</span><span class="s2">&quot;statuses&quot;</span><span class="p">,</span> <span class="n">statuses_var</span><span class="p">)</span>
+    <span class="n">workfiles_field</span><span class="o">.</span><span class="n">set_filter</span><span class="p">(</span><span class="s2">&quot;tags&quot;</span><span class="p">,</span> <span class="n">tags_var</span><span class="p">)</span>
+
+    <span class="n">nested_fields</span> <span class="o">=</span> <span class="n">fields_to_dict</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">fields</span><span class="p">))</span>
+    <span class="n">add_links_fields</span><span class="p">(</span><span class="n">workfiles_field</span><span class="p">,</span> <span class="n">nested_fields</span><span class="p">)</span>
+
+    <span class="n">query_queue</span> <span class="o">=</span> <span class="n">collections</span><span class="o">.</span><span class="n">deque</span><span class="p">()</span>
+    <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">nested_fields</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="n">query_queue</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">workfiles_field</span><span class="p">))</span>
+
+    <span class="k">while</span> <span class="n">query_queue</span><span class="p">:</span>
+        <span class="n">item</span> <span class="o">=</span> <span class="n">query_queue</span><span class="o">.</span><span class="n">popleft</span><span class="p">()</span>
+        <span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">parent</span> <span class="o">=</span> <span class="n">item</span>
+        <span class="n">field</span> <span class="o">=</span> <span class="n">parent</span><span class="o">.</span><span class="n">add_field</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">value</span> <span class="ow">is</span> <span class="n">FIELD_VALUE</span><span class="p">:</span>
+            <span class="k">continue</span>
+
+        <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">value</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="n">query_queue</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">k</span><span class="p">,</span> <span class="n">v</span><span class="p">,</span> <span class="n">field</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">query</span></div>
+
+
+<div class="viewcode-block" id="events_graphql_query"><a class="viewcode-back" href="../../ayon_api.graphql_queries.html#ayon_api.graphql_queries.events_graphql_query">[docs]</a><span class="k">def</span> <span class="nf">events_graphql_query</span><span class="p">(</span><span class="n">fields</span><span class="p">,</span> <span class="n">order</span><span class="p">,</span> <span class="n">use_states</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="n">query</span> <span class="o">=</span> <span class="n">GraphQlQuery</span><span class="p">(</span><span class="s2">&quot;Events&quot;</span><span class="p">,</span> <span class="n">order</span><span class="o">=</span><span class="n">order</span><span class="p">)</span>
+    <span class="n">topics_var</span> <span class="o">=</span> <span class="n">query</span><span class="o">.</span><span class="n">add_variable</span><span class="p">(</span><span class="s2">&quot;eventTopics&quot;</span><span class="p">,</span> <span class="s2">&quot;[String!]&quot;</span><span class="p">)</span>
+    <span class="n">ids_var</span> <span class="o">=</span> <span class="n">query</span><span class="o">.</span><span class="n">add_variable</span><span class="p">(</span><span class="s2">&quot;eventIds&quot;</span><span class="p">,</span> <span class="s2">&quot;[String!]&quot;</span><span class="p">)</span>
+    <span class="n">projects_var</span> <span class="o">=</span> <span class="n">query</span><span class="o">.</span><span class="n">add_variable</span><span class="p">(</span><span class="s2">&quot;projectNames&quot;</span><span class="p">,</span> <span class="s2">&quot;[String!]&quot;</span><span class="p">)</span>
+    <span class="n">statuses_var</span> <span class="o">=</span> <span class="n">query</span><span class="o">.</span><span class="n">add_variable</span><span class="p">(</span><span class="s2">&quot;eventStatuses&quot;</span><span class="p">,</span> <span class="s2">&quot;[String!]&quot;</span><span class="p">)</span>
+    <span class="n">users_var</span> <span class="o">=</span> <span class="n">query</span><span class="o">.</span><span class="n">add_variable</span><span class="p">(</span><span class="s2">&quot;eventUsers&quot;</span><span class="p">,</span> <span class="s2">&quot;[String!]&quot;</span><span class="p">)</span>
+    <span class="n">include_logs_var</span> <span class="o">=</span> <span class="n">query</span><span class="o">.</span><span class="n">add_variable</span><span class="p">(</span><span class="s2">&quot;includeLogsFilter&quot;</span><span class="p">,</span> <span class="s2">&quot;Boolean!&quot;</span><span class="p">)</span>
+    <span class="n">has_children_var</span> <span class="o">=</span> <span class="n">query</span><span class="o">.</span><span class="n">add_variable</span><span class="p">(</span><span class="s2">&quot;hasChildrenFilter&quot;</span><span class="p">,</span> <span class="s2">&quot;Boolean!&quot;</span><span class="p">)</span>
+    <span class="n">newer_than_var</span> <span class="o">=</span> <span class="n">query</span><span class="o">.</span><span class="n">add_variable</span><span class="p">(</span><span class="s2">&quot;newerThanFilter&quot;</span><span class="p">,</span> <span class="s2">&quot;String!&quot;</span><span class="p">)</span>
+    <span class="n">older_than_var</span> <span class="o">=</span> <span class="n">query</span><span class="o">.</span><span class="n">add_variable</span><span class="p">(</span><span class="s2">&quot;olderThanFilter&quot;</span><span class="p">,</span> <span class="s2">&quot;String!&quot;</span><span class="p">)</span>
+
+    <span class="n">statuses_filter_name</span> <span class="o">=</span> <span class="s2">&quot;statuses&quot;</span>
+    <span class="k">if</span> <span class="n">use_states</span><span class="p">:</span>
+        <span class="n">statuses_filter_name</span> <span class="o">=</span> <span class="s2">&quot;states&quot;</span>
+    <span class="n">events_field</span> <span class="o">=</span> <span class="n">query</span><span class="o">.</span><span class="n">add_field_with_edges</span><span class="p">(</span><span class="s2">&quot;events&quot;</span><span class="p">)</span>
+    <span class="n">events_field</span><span class="o">.</span><span class="n">set_filter</span><span class="p">(</span><span class="s2">&quot;ids&quot;</span><span class="p">,</span> <span class="n">ids_var</span><span class="p">)</span>
+    <span class="n">events_field</span><span class="o">.</span><span class="n">set_filter</span><span class="p">(</span><span class="s2">&quot;topics&quot;</span><span class="p">,</span> <span class="n">topics_var</span><span class="p">)</span>
+    <span class="n">events_field</span><span class="o">.</span><span class="n">set_filter</span><span class="p">(</span><span class="s2">&quot;projects&quot;</span><span class="p">,</span> <span class="n">projects_var</span><span class="p">)</span>
+    <span class="n">events_field</span><span class="o">.</span><span class="n">set_filter</span><span class="p">(</span><span class="n">statuses_filter_name</span><span class="p">,</span> <span class="n">statuses_var</span><span class="p">)</span>
+    <span class="n">events_field</span><span class="o">.</span><span class="n">set_filter</span><span class="p">(</span><span class="s2">&quot;users&quot;</span><span class="p">,</span> <span class="n">users_var</span><span class="p">)</span>
+    <span class="n">events_field</span><span class="o">.</span><span class="n">set_filter</span><span class="p">(</span><span class="s2">&quot;includeLogs&quot;</span><span class="p">,</span> <span class="n">include_logs_var</span><span class="p">)</span>
+    <span class="n">events_field</span><span class="o">.</span><span class="n">set_filter</span><span class="p">(</span><span class="s2">&quot;hasChildren&quot;</span><span class="p">,</span> <span class="n">has_children_var</span><span class="p">)</span>
+    <span class="n">events_field</span><span class="o">.</span><span class="n">set_filter</span><span class="p">(</span><span class="s2">&quot;newerThan&quot;</span><span class="p">,</span> <span class="n">newer_than_var</span><span class="p">)</span>
+    <span class="n">events_field</span><span class="o">.</span><span class="n">set_filter</span><span class="p">(</span><span class="s2">&quot;olderThan&quot;</span><span class="p">,</span> <span class="n">older_than_var</span><span class="p">)</span>
+
+    <span class="n">nested_fields</span> <span class="o">=</span> <span class="n">fields_to_dict</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">fields</span><span class="p">))</span>
+
+    <span class="n">query_queue</span> <span class="o">=</span> <span class="n">collections</span><span class="o">.</span><span class="n">deque</span><span class="p">()</span>
+    <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">nested_fields</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="n">query_queue</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">events_field</span><span class="p">))</span>
+
+    <span class="k">while</span> <span class="n">query_queue</span><span class="p">:</span>
+        <span class="n">item</span> <span class="o">=</span> <span class="n">query_queue</span><span class="o">.</span><span class="n">popleft</span><span class="p">()</span>
+        <span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">parent</span> <span class="o">=</span> <span class="n">item</span>
+        <span class="n">field</span> <span class="o">=</span> <span class="n">parent</span><span class="o">.</span><span class="n">add_field</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">value</span> <span class="ow">is</span> <span class="n">FIELD_VALUE</span><span class="p">:</span>
+            <span class="k">continue</span>
+
+        <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">value</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="n">query_queue</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">k</span><span class="p">,</span> <span class="n">v</span><span class="p">,</span> <span class="n">field</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">query</span></div>
+
+
+<div class="viewcode-block" id="users_graphql_query"><a class="viewcode-back" href="../../ayon_api.graphql_queries.html#ayon_api.graphql_queries.users_graphql_query">[docs]</a><span class="k">def</span> <span class="nf">users_graphql_query</span><span class="p">(</span><span class="n">fields</span><span class="p">):</span>
+    <span class="n">query</span> <span class="o">=</span> <span class="n">GraphQlQuery</span><span class="p">(</span><span class="s2">&quot;Users&quot;</span><span class="p">)</span>
+    <span class="n">names_var</span> <span class="o">=</span> <span class="n">query</span><span class="o">.</span><span class="n">add_variable</span><span class="p">(</span><span class="s2">&quot;userNames&quot;</span><span class="p">,</span> <span class="s2">&quot;[String!]&quot;</span><span class="p">)</span>
+    <span class="n">project_name_var</span> <span class="o">=</span> <span class="n">query</span><span class="o">.</span><span class="n">add_variable</span><span class="p">(</span><span class="s2">&quot;projectName&quot;</span><span class="p">,</span> <span class="s2">&quot;String!&quot;</span><span class="p">)</span>
+
+    <span class="n">users_field</span> <span class="o">=</span> <span class="n">query</span><span class="o">.</span><span class="n">add_field_with_edges</span><span class="p">(</span><span class="s2">&quot;users&quot;</span><span class="p">)</span>
+    <span class="n">users_field</span><span class="o">.</span><span class="n">set_filter</span><span class="p">(</span><span class="s2">&quot;names&quot;</span><span class="p">,</span> <span class="n">names_var</span><span class="p">)</span>
+    <span class="n">users_field</span><span class="o">.</span><span class="n">set_filter</span><span class="p">(</span><span class="s2">&quot;projectName&quot;</span><span class="p">,</span> <span class="n">project_name_var</span><span class="p">)</span>
+
+    <span class="n">nested_fields</span> <span class="o">=</span> <span class="n">fields_to_dict</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">fields</span><span class="p">))</span>
+
+    <span class="n">query_queue</span> <span class="o">=</span> <span class="n">collections</span><span class="o">.</span><span class="n">deque</span><span class="p">()</span>
+    <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">nested_fields</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="n">query_queue</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">users_field</span><span class="p">))</span>
+
+    <span class="k">while</span> <span class="n">query_queue</span><span class="p">:</span>
+        <span class="n">item</span> <span class="o">=</span> <span class="n">query_queue</span><span class="o">.</span><span class="n">popleft</span><span class="p">()</span>
+        <span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">parent</span> <span class="o">=</span> <span class="n">item</span>
+        <span class="n">field</span> <span class="o">=</span> <span class="n">parent</span><span class="o">.</span><span class="n">add_field</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">value</span> <span class="ow">is</span> <span class="n">FIELD_VALUE</span><span class="p">:</span>
+            <span class="k">continue</span>
+
+        <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">value</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="n">query_queue</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">k</span><span class="p">,</span> <span class="n">v</span><span class="p">,</span> <span class="n">field</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">query</span></div>
+
+
+<div class="viewcode-block" id="activities_graphql_query"><a class="viewcode-back" href="../../ayon_api.graphql_queries.html#ayon_api.graphql_queries.activities_graphql_query">[docs]</a><span class="k">def</span> <span class="nf">activities_graphql_query</span><span class="p">(</span><span class="n">fields</span><span class="p">,</span> <span class="n">order</span><span class="p">):</span>
+    <span class="n">query</span> <span class="o">=</span> <span class="n">GraphQlQuery</span><span class="p">(</span><span class="s2">&quot;Activities&quot;</span><span class="p">,</span> <span class="n">order</span><span class="o">=</span><span class="n">order</span><span class="p">)</span>
+    <span class="n">project_name_var</span> <span class="o">=</span> <span class="n">query</span><span class="o">.</span><span class="n">add_variable</span><span class="p">(</span><span class="s2">&quot;projectName&quot;</span><span class="p">,</span> <span class="s2">&quot;String!&quot;</span><span class="p">)</span>
+    <span class="n">activity_ids_var</span> <span class="o">=</span> <span class="n">query</span><span class="o">.</span><span class="n">add_variable</span><span class="p">(</span><span class="s2">&quot;activityIds&quot;</span><span class="p">,</span> <span class="s2">&quot;[String!]&quot;</span><span class="p">)</span>
+    <span class="n">activity_types_var</span> <span class="o">=</span> <span class="n">query</span><span class="o">.</span><span class="n">add_variable</span><span class="p">(</span><span class="s2">&quot;activityTypes&quot;</span><span class="p">,</span> <span class="s2">&quot;[String!]&quot;</span><span class="p">)</span>
+    <span class="n">entity_ids_var</span> <span class="o">=</span> <span class="n">query</span><span class="o">.</span><span class="n">add_variable</span><span class="p">(</span><span class="s2">&quot;entityIds&quot;</span><span class="p">,</span> <span class="s2">&quot;[String!]&quot;</span><span class="p">)</span>
+    <span class="n">entity_names_var</span> <span class="o">=</span> <span class="n">query</span><span class="o">.</span><span class="n">add_variable</span><span class="p">(</span><span class="s2">&quot;entityNames&quot;</span><span class="p">,</span> <span class="s2">&quot;[String!]&quot;</span><span class="p">)</span>
+    <span class="n">entity_type_var</span> <span class="o">=</span> <span class="n">query</span><span class="o">.</span><span class="n">add_variable</span><span class="p">(</span><span class="s2">&quot;entityType&quot;</span><span class="p">,</span> <span class="s2">&quot;String!&quot;</span><span class="p">)</span>
+    <span class="n">changed_after_var</span> <span class="o">=</span> <span class="n">query</span><span class="o">.</span><span class="n">add_variable</span><span class="p">(</span><span class="s2">&quot;changedAfter&quot;</span><span class="p">,</span> <span class="s2">&quot;String!&quot;</span><span class="p">)</span>
+    <span class="n">changed_before_var</span> <span class="o">=</span> <span class="n">query</span><span class="o">.</span><span class="n">add_variable</span><span class="p">(</span><span class="s2">&quot;changedBefore&quot;</span><span class="p">,</span> <span class="s2">&quot;String!&quot;</span><span class="p">)</span>
+    <span class="n">reference_types_var</span> <span class="o">=</span> <span class="n">query</span><span class="o">.</span><span class="n">add_variable</span><span class="p">(</span><span class="s2">&quot;referenceTypes&quot;</span><span class="p">,</span> <span class="s2">&quot;[String!]&quot;</span><span class="p">)</span>
+
+    <span class="n">project_field</span> <span class="o">=</span> <span class="n">query</span><span class="o">.</span><span class="n">add_field</span><span class="p">(</span><span class="s2">&quot;project&quot;</span><span class="p">)</span>
+    <span class="n">project_field</span><span class="o">.</span><span class="n">set_filter</span><span class="p">(</span><span class="s2">&quot;name&quot;</span><span class="p">,</span> <span class="n">project_name_var</span><span class="p">)</span>
+
+    <span class="n">activities_field</span> <span class="o">=</span> <span class="n">project_field</span><span class="o">.</span><span class="n">add_field_with_edges</span><span class="p">(</span><span class="s2">&quot;activities&quot;</span><span class="p">)</span>
+    <span class="n">activities_field</span><span class="o">.</span><span class="n">set_filter</span><span class="p">(</span><span class="s2">&quot;activityIds&quot;</span><span class="p">,</span> <span class="n">activity_ids_var</span><span class="p">)</span>
+    <span class="n">activities_field</span><span class="o">.</span><span class="n">set_filter</span><span class="p">(</span><span class="s2">&quot;activityTypes&quot;</span><span class="p">,</span> <span class="n">activity_types_var</span><span class="p">)</span>
+    <span class="n">activities_field</span><span class="o">.</span><span class="n">set_filter</span><span class="p">(</span><span class="s2">&quot;entityIds&quot;</span><span class="p">,</span> <span class="n">entity_ids_var</span><span class="p">)</span>
+    <span class="n">activities_field</span><span class="o">.</span><span class="n">set_filter</span><span class="p">(</span><span class="s2">&quot;entityNames&quot;</span><span class="p">,</span> <span class="n">entity_names_var</span><span class="p">)</span>
+    <span class="n">activities_field</span><span class="o">.</span><span class="n">set_filter</span><span class="p">(</span><span class="s2">&quot;entityType&quot;</span><span class="p">,</span> <span class="n">entity_type_var</span><span class="p">)</span>
+    <span class="n">activities_field</span><span class="o">.</span><span class="n">set_filter</span><span class="p">(</span><span class="s2">&quot;changedAfter&quot;</span><span class="p">,</span> <span class="n">changed_after_var</span><span class="p">)</span>
+    <span class="n">activities_field</span><span class="o">.</span><span class="n">set_filter</span><span class="p">(</span><span class="s2">&quot;changedBefore&quot;</span><span class="p">,</span> <span class="n">changed_before_var</span><span class="p">)</span>
+    <span class="n">activities_field</span><span class="o">.</span><span class="n">set_filter</span><span class="p">(</span><span class="s2">&quot;referenceTypes&quot;</span><span class="p">,</span> <span class="n">reference_types_var</span><span class="p">)</span>
+
+    <span class="n">nested_fields</span> <span class="o">=</span> <span class="n">fields_to_dict</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">fields</span><span class="p">))</span>
+
+    <span class="n">query_queue</span> <span class="o">=</span> <span class="n">collections</span><span class="o">.</span><span class="n">deque</span><span class="p">()</span>
+    <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">nested_fields</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="n">query_queue</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">activities_field</span><span class="p">))</span>
+
+    <span class="k">while</span> <span class="n">query_queue</span><span class="p">:</span>
+        <span class="n">item</span> <span class="o">=</span> <span class="n">query_queue</span><span class="o">.</span><span class="n">popleft</span><span class="p">()</span>
+        <span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">parent</span> <span class="o">=</span> <span class="n">item</span>
+        <span class="n">field</span> <span class="o">=</span> <span class="n">parent</span><span class="o">.</span><span class="n">add_field</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">value</span> <span class="ow">is</span> <span class="n">FIELD_VALUE</span><span class="p">:</span>
+            <span class="k">continue</span>
+
+        <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">value</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="n">query_queue</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">k</span><span class="p">,</span> <span class="n">v</span><span class="p">,</span> <span class="n">field</span><span class="p">))</span>
+
+    <span class="k">return</span> <span class="n">query</span></div>
+</pre></div>
+
+					 </div>
+					 
+					</div>
+					<footer>
+  
+
+  <div role="contentinfo">
+    <p>
+        
+        &copy; Copyright 2024, ynput.io <info@ynput.io>
+	  <br>
+      
+      
+      
+      Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+      
+      <a href="https://github.com/revitron/revitron-sphinx-theme">theme</a>
+      
+      provided by <a href="https://github.com/revitron">Revitron</a>.
+
+    </p>
+  </div> 
+
+</footer>
+
+				</div>
+			</div>
+
+		</section>
+
+	</div>
+	
+
+	<script type="text/javascript">
+			jQuery(function () {
+					SphinxRtdTheme.Navigation.enable(true);
+			});
+	</script>
+
+	
+	
+		
+	 
+
+ 
+</body>	
+</html>

@@ -1,0 +1,1115 @@
+
+	
+
+<!DOCTYPE html>
+<html class="writer-html5 " lang="en" >
+<head>
+	<meta charset="utf-8">
+	
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	
+		<title>ayon_api.utils &mdash; ayon-python-api 1.0.11 documentation</title>
+	
+	
+	
+	<link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+	<link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+	<link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+	<link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+
+	
+	
+		<link rel="shortcut icon" href="../../_static/favicon.ico"/>
+	
+	
+	
+		<link rel="canonical" href="https://github.com/ynput/ayon-python-api_modules/ayon_api/utils.html"/>
+	
+
+	
+	<!--[if lt IE 9]>
+		<script src="../../_static/js/html5shiv.min.js"></script>
+	<![endif]-->
+	
+		
+			<script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+				<script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+				<script src="../../_static/jquery.js"></script>
+				<script src="../../_static/underscore.js"></script>
+				<script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+				<script src="../../_static/doctools.js"></script>
+				<script src="../../_static/sphinx_highlight.js"></script>
+		
+		<script type="text/javascript" src="../../_static/js/theme.js"></script>
+
+		
+		<link rel="index" title="Index" href="../../genindex.html" />
+		<link rel="search" title="Search" href="../../search.html" /> 
+</head>
+<body class="wy-body-for-nav">
+
+
+	 
+	<div class="wy-grid-for-nav">
+		
+		<nav data-toggle="wy-nav-shift" class="wy-nav-side">
+			<div class="wy-side-scroll">
+				<div class="wy-side-nav-search">
+					
+						<div class="brand">
+							<a href="../../index.html">
+							
+								<img src="../../_static/AYON_blackG_dot.svg" class="logo" alt="Logo"/>
+							
+							</a>
+						</div>
+						
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+					
+				</div>
+				
+				<div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+					
+						
+						
+							
+						
+						
+							<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../modules.html">ayon_api</a></li>
+</ul>
+
+						
+					
+				</div>
+				
+			</div>
+		</nav>
+
+		<section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+			
+			<nav class="wy-nav-top" aria-label="top navigation">
+			
+				<i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+				<a href="../../index.html">
+					
+						<img src="../../_static/AYON_blackG_dot.svg" class="logo" alt="Logo"/>
+					
+				</a>
+			
+			</nav>
+
+
+			<div class="wy-nav-content">
+				
+				<div class="rst-content">
+				
+					<div role="navigation" aria-label="breadcrumbs navigation">
+
+	<ul class="wy-breadcrumbs">
+		
+			
+				<li><a href="../../index.html">ayon-python-api</a> ⁄&nbsp;</li>
+				
+					<li><a href="../index.html">Module code</a> ⁄&nbsp;</li>
+				
+				<li><a href="">ayon_api.utils</a></li>
+			
+		
+		
+			<li class="wy-breadcrumbs-aside">
+			
+				<a href="https://github.com/ynput/ayon-python-api" class="fa fa-github-alt"></a>
+			
+			</li>
+		
+	</ul>
+
+</div>
+					<div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+					 <div itemprop="articleBody">
+						
+  <h1>Source code for ayon_api.utils</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">re</span>
+<span class="kn">import</span> <span class="nn">datetime</span>
+<span class="kn">import</span> <span class="nn">uuid</span>
+<span class="kn">import</span> <span class="nn">string</span>
+<span class="kn">import</span> <span class="nn">platform</span>
+<span class="kn">import</span> <span class="nn">collections</span>
+<span class="kn">from</span> <span class="nn">urllib.parse</span> <span class="kn">import</span> <span class="n">urlparse</span><span class="p">,</span> <span class="n">urlencode</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Any</span>
+<span class="kn">from</span> <span class="nn">enum</span> <span class="kn">import</span> <span class="n">IntEnum</span>
+
+<span class="kn">import</span> <span class="nn">requests</span>
+<span class="kn">import</span> <span class="nn">unidecode</span>
+
+<span class="kn">from</span> <span class="nn">.constants</span> <span class="kn">import</span> <span class="p">(</span>
+    <span class="n">SERVER_TIMEOUT_ENV_KEY</span><span class="p">,</span>
+    <span class="n">DEFAULT_VARIANT_ENV_KEY</span><span class="p">,</span>
+    <span class="n">SITE_ID_ENV_KEY</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="kn">from</span> <span class="nn">.exceptions</span> <span class="kn">import</span> <span class="n">UrlError</span>
+
+<span class="n">REMOVED_VALUE</span> <span class="o">=</span> <span class="nb">object</span><span class="p">()</span>
+<span class="n">NOT_SET</span> <span class="o">=</span> <span class="nb">object</span><span class="p">()</span>
+<span class="n">SLUGIFY_WHITELIST</span> <span class="o">=</span> <span class="n">string</span><span class="o">.</span><span class="n">ascii_letters</span> <span class="o">+</span> <span class="n">string</span><span class="o">.</span><span class="n">digits</span>
+<span class="n">SLUGIFY_SEP_WHITELIST</span> <span class="o">=</span> <span class="s2">&quot; ,./</span><span class="se">\\</span><span class="s2">;:!|*^#@~+-_=&quot;</span>
+
+<span class="n">RepresentationParents</span> <span class="o">=</span> <span class="n">collections</span><span class="o">.</span><span class="n">namedtuple</span><span class="p">(</span>
+    <span class="s2">&quot;RepresentationParents&quot;</span><span class="p">,</span>
+    <span class="p">(</span><span class="s2">&quot;version&quot;</span><span class="p">,</span> <span class="s2">&quot;product&quot;</span><span class="p">,</span> <span class="s2">&quot;folder&quot;</span><span class="p">,</span> <span class="s2">&quot;project&quot;</span><span class="p">)</span>
+<span class="p">)</span>
+
+<span class="n">RepresentationHierarchy</span> <span class="o">=</span> <span class="n">collections</span><span class="o">.</span><span class="n">namedtuple</span><span class="p">(</span>
+    <span class="s2">&quot;RepresentationHierarchy&quot;</span><span class="p">,</span>
+    <span class="p">(</span>
+        <span class="s2">&quot;project&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;folder&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;task&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;product&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;version&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;representation&quot;</span><span class="p">,</span>
+    <span class="p">)</span>
+<span class="p">)</span>
+
+
+<div class="viewcode-block" id="SortOrder"><a class="viewcode-back" href="../../ayon_api.utils.html#ayon_api.SortOrder">[docs]</a><span class="k">class</span> <span class="nc">SortOrder</span><span class="p">(</span><span class="n">IntEnum</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Sort order for GraphQl requests.&quot;&quot;&quot;</span>
+    <span class="n">ascending</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">descending</span> <span class="o">=</span> <span class="mi">1</span>
+
+<div class="viewcode-block" id="SortOrder.parse_value"><a class="viewcode-back" href="../../ayon_api.utils.html#ayon_api.SortOrder.parse_value">[docs]</a>    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">parse_value</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">value</span> <span class="ow">in</span> <span class="p">(</span><span class="bp">cls</span><span class="o">.</span><span class="n">ascending</span><span class="p">,</span> <span class="s2">&quot;ascending&quot;</span><span class="p">,</span> <span class="s2">&quot;asc&quot;</span><span class="p">):</span>
+            <span class="k">return</span> <span class="bp">cls</span><span class="o">.</span><span class="n">ascending</span>
+        <span class="k">if</span> <span class="n">value</span> <span class="ow">in</span> <span class="p">(</span><span class="bp">cls</span><span class="o">.</span><span class="n">descending</span><span class="p">,</span> <span class="s2">&quot;descending&quot;</span><span class="p">,</span> <span class="s2">&quot;desc&quot;</span><span class="p">):</span>
+            <span class="k">return</span> <span class="bp">cls</span><span class="o">.</span><span class="n">descending</span>
+        <span class="k">return</span> <span class="n">default</span></div></div>
+
+
+<div class="viewcode-block" id="get_default_timeout"><a class="viewcode-back" href="../../ayon_api.utils.html#ayon_api.get_default_timeout">[docs]</a><span class="k">def</span> <span class="nf">get_default_timeout</span><span class="p">():</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Default value for requests timeout.</span>
+
+<span class="sd">    First looks for environment variable SERVER_TIMEOUT_ENV_KEY which</span>
+<span class="sd">    can affect timeout value. If not available then use 10.0 s.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        float: Timeout value in seconds.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="k">return</span> <span class="nb">float</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">SERVER_TIMEOUT_ENV_KEY</span><span class="p">))</span>
+    <span class="k">except</span> <span class="p">(</span><span class="ne">ValueError</span><span class="p">,</span> <span class="ne">TypeError</span><span class="p">):</span>
+        <span class="k">pass</span>
+    <span class="k">return</span> <span class="mf">10.0</span></div>
+
+
+<div class="viewcode-block" id="get_default_settings_variant"><a class="viewcode-back" href="../../ayon_api.utils.html#ayon_api.get_default_settings_variant">[docs]</a><span class="k">def</span> <span class="nf">get_default_settings_variant</span><span class="p">():</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Default settings variant.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        str: Settings variant from environment variable or &#39;production&#39;.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">DEFAULT_VARIANT_ENV_KEY</span><span class="p">)</span> <span class="ow">or</span> <span class="s2">&quot;production&quot;</span></div>
+
+
+<div class="viewcode-block" id="get_default_site_id"><a class="viewcode-back" href="../../ayon_api.utils.html#ayon_api.get_default_site_id">[docs]</a><span class="k">def</span> <span class="nf">get_default_site_id</span><span class="p">():</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Site id used for server connection.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        Union[str, None]: Site id from environment variable or None.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">SITE_ID_ENV_KEY</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="ThumbnailContent"><a class="viewcode-back" href="../../ayon_api.utils.html#ayon_api.ThumbnailContent">[docs]</a><span class="k">class</span> <span class="nc">ThumbnailContent</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Wrapper for thumbnail content.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        project_name (str): Project name.</span>
+<span class="sd">        thumbnail_id (Union[str, None]): Thumbnail id.</span>
+<span class="sd">        content_type (Union[str, None]): Content type e.g. &#39;image/png&#39;.</span>
+<span class="sd">        content (Union[bytes, None]): Thumbnail content.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">project_name</span><span class="p">,</span> <span class="n">thumbnail_id</span><span class="p">,</span> <span class="n">content</span><span class="p">,</span> <span class="n">content_type</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">project_name</span> <span class="o">=</span> <span class="n">project_name</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">thumbnail_id</span> <span class="o">=</span> <span class="n">thumbnail_id</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">content_type</span> <span class="o">=</span> <span class="n">content_type</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">content</span> <span class="o">=</span> <span class="n">content</span> <span class="ow">or</span> <span class="sa">b</span><span class="s2">&quot;&quot;</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">id</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Wrapper for thumbnail id.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">thumbnail_id</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">is_valid</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Content of thumbnail is valid.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            bool: Content is valid and can be used.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">thumbnail_id</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+            <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">content_type</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+        <span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="prepare_query_string"><a class="viewcode-back" href="../../ayon_api.utils.html#ayon_api.prepare_query_string">[docs]</a><span class="k">def</span> <span class="nf">prepare_query_string</span><span class="p">(</span><span class="n">key_values</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Prepare data to query string.</span>
+
+<span class="sd">    If there are any values a query starting with &#39;?&#39; is returned otherwise</span>
+<span class="sd">    an empty string.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">         dict[str, Any]: Query values.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        str: Query string.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">key_values</span><span class="p">:</span>
+        <span class="k">return</span> <span class="s2">&quot;&quot;</span>
+    <span class="k">return</span> <span class="s2">&quot;?</span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">urlencode</span><span class="p">(</span><span class="n">key_values</span><span class="p">))</span></div>
+
+
+<div class="viewcode-block" id="create_entity_id"><a class="viewcode-back" href="../../ayon_api.utils.html#ayon_api.create_entity_id">[docs]</a><span class="k">def</span> <span class="nf">create_entity_id</span><span class="p">():</span>
+    <span class="k">return</span> <span class="n">uuid</span><span class="o">.</span><span class="n">uuid1</span><span class="p">()</span><span class="o">.</span><span class="n">hex</span></div>
+
+
+<div class="viewcode-block" id="convert_entity_id"><a class="viewcode-back" href="../../ayon_api.utils.html#ayon_api.convert_entity_id">[docs]</a><span class="k">def</span> <span class="nf">convert_entity_id</span><span class="p">(</span><span class="n">entity_id</span><span class="p">):</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">entity_id</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">None</span>
+
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">entity_id</span><span class="p">,</span> <span class="n">uuid</span><span class="o">.</span><span class="n">UUID</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">entity_id</span><span class="o">.</span><span class="n">hex</span>
+
+    <span class="k">try</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">uuid</span><span class="o">.</span><span class="n">UUID</span><span class="p">(</span><span class="n">entity_id</span><span class="p">)</span><span class="o">.</span><span class="n">hex</span>
+
+    <span class="k">except</span> <span class="p">(</span><span class="ne">TypeError</span><span class="p">,</span> <span class="ne">ValueError</span><span class="p">,</span> <span class="ne">AttributeError</span><span class="p">):</span>
+        <span class="k">pass</span>
+    <span class="k">return</span> <span class="kc">None</span></div>
+
+
+<div class="viewcode-block" id="convert_or_create_entity_id"><a class="viewcode-back" href="../../ayon_api.utils.html#ayon_api.convert_or_create_entity_id">[docs]</a><span class="k">def</span> <span class="nf">convert_or_create_entity_id</span><span class="p">(</span><span class="n">entity_id</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="n">output</span> <span class="o">=</span> <span class="n">convert_entity_id</span><span class="p">(</span><span class="n">entity_id</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">output</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">output</span> <span class="o">=</span> <span class="n">create_entity_id</span><span class="p">()</span>
+    <span class="k">return</span> <span class="n">output</span></div>
+
+
+<div class="viewcode-block" id="entity_data_json_default"><a class="viewcode-back" href="../../ayon_api.utils.html#ayon_api.entity_data_json_default">[docs]</a><span class="k">def</span> <span class="nf">entity_data_json_default</span><span class="p">(</span><span class="n">value</span><span class="p">):</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">int</span><span class="p">(</span><span class="n">value</span><span class="o">.</span><span class="n">timestamp</span><span class="p">())</span>
+
+    <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span>
+        <span class="s2">&quot;Object of type </span><span class="si">{}</span><span class="s2"> is not JSON serializable&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">value</span><span class="p">)))</span>
+    <span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="slugify_string"><a class="viewcode-back" href="../../ayon_api.utils.html#ayon_api.slugify_string">[docs]</a><span class="k">def</span> <span class="nf">slugify_string</span><span class="p">(</span>
+    <span class="n">input_string</span><span class="p">,</span>
+    <span class="n">separator</span><span class="o">=</span><span class="s2">&quot;_&quot;</span><span class="p">,</span>
+    <span class="n">slug_whitelist</span><span class="o">=</span><span class="n">SLUGIFY_WHITELIST</span><span class="p">,</span>
+    <span class="n">split_chars</span><span class="o">=</span><span class="n">SLUGIFY_SEP_WHITELIST</span><span class="p">,</span>
+    <span class="n">min_length</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+    <span class="n">lower</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+    <span class="n">make_set</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+<span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Slugify a text string.</span>
+
+<span class="sd">    This function removes transliterates input string to ASCII, removes</span>
+<span class="sd">    special characters and use join resulting elements using</span>
+<span class="sd">    specified separator.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        input_string (str): Input string to slugify</span>
+<span class="sd">        separator (str): A string used to separate returned elements</span>
+<span class="sd">            (default: &quot;_&quot;)</span>
+<span class="sd">        slug_whitelist (str): Characters allowed in the output</span>
+<span class="sd">            (default: ascii letters, digits and the separator)</span>
+<span class="sd">        split_chars (str): Set of characters used for word splitting</span>
+<span class="sd">            (there is a sane default)</span>
+<span class="sd">        lower (bool): Convert to lower-case (default: False)</span>
+<span class="sd">        make_set (bool): Return &quot;set&quot; object instead of string.</span>
+<span class="sd">        min_length (int): Minimal length of an element (word).</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        Union[str, Set[str]]: Based on &#39;make_set&#39; value returns slugified</span>
+<span class="sd">            string.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">tmp_string</span> <span class="o">=</span> <span class="n">unidecode</span><span class="o">.</span><span class="n">unidecode</span><span class="p">(</span><span class="n">input_string</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">lower</span><span class="p">:</span>
+        <span class="n">tmp_string</span> <span class="o">=</span> <span class="n">tmp_string</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+
+    <span class="n">parts</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="c1"># Remove all characters that are not in whitelist</span>
+        <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="s2">&quot;[^</span><span class="si">{}</span><span class="s2">]&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">re</span><span class="o">.</span><span class="n">escape</span><span class="p">(</span><span class="n">slug_whitelist</span><span class="p">)),</span> <span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">part</span><span class="p">)</span>
+        <span class="c1"># Split text into part by split characters</span>
+        <span class="k">for</span> <span class="n">part</span> <span class="ow">in</span> <span class="n">re</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;[</span><span class="si">{}</span><span class="s2">]&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">re</span><span class="o">.</span><span class="n">escape</span><span class="p">(</span><span class="n">split_chars</span><span class="p">)),</span> <span class="n">tmp_string</span><span class="p">)</span>
+    <span class="p">]</span>
+    <span class="c1"># Filter text parts by length</span>
+    <span class="n">filtered_parts</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="n">part</span>
+        <span class="k">for</span> <span class="n">part</span> <span class="ow">in</span> <span class="n">parts</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">part</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="n">min_length</span>
+    <span class="p">]</span>
+    <span class="k">if</span> <span class="n">make_set</span><span class="p">:</span>
+        <span class="k">return</span> <span class="nb">set</span><span class="p">(</span><span class="n">filtered_parts</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">separator</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">filtered_parts</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="failed_json_default"><a class="viewcode-back" href="../../ayon_api.utils.html#ayon_api.failed_json_default">[docs]</a><span class="k">def</span> <span class="nf">failed_json_default</span><span class="p">(</span><span class="n">value</span><span class="p">):</span>
+    <span class="k">return</span> <span class="s2">&quot;&lt; Failed value </span><span class="si">{}</span><span class="s2"> &gt; </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">value</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">value</span><span class="p">))</span></div>
+
+
+<div class="viewcode-block" id="prepare_attribute_changes"><a class="viewcode-back" href="../../ayon_api.utils.html#ayon_api.prepare_attribute_changes">[docs]</a><span class="k">def</span> <span class="nf">prepare_attribute_changes</span><span class="p">(</span><span class="n">old_entity</span><span class="p">,</span> <span class="n">new_entity</span><span class="p">,</span> <span class="n">replace</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="n">attrib_changes</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="n">new_attrib</span> <span class="o">=</span> <span class="n">new_entity</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;attrib&quot;</span><span class="p">)</span>
+    <span class="n">old_attrib</span> <span class="o">=</span> <span class="n">old_entity</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;attrib&quot;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">new_attrib</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">replace</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">attrib_changes</span>
+        <span class="n">new_attrib</span> <span class="o">=</span> <span class="p">{}</span>
+
+    <span class="k">if</span> <span class="n">old_attrib</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">new_attrib</span>
+
+    <span class="k">for</span> <span class="n">attr</span><span class="p">,</span> <span class="n">new_attr_value</span> <span class="ow">in</span> <span class="n">new_attrib</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="n">old_attr_value</span> <span class="o">=</span> <span class="n">old_attrib</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">attr</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">old_attr_value</span> <span class="o">!=</span> <span class="n">new_attr_value</span><span class="p">:</span>
+            <span class="n">attrib_changes</span><span class="p">[</span><span class="n">attr</span><span class="p">]</span> <span class="o">=</span> <span class="n">new_attr_value</span>
+
+    <span class="k">if</span> <span class="n">replace</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">attr</span> <span class="ow">in</span> <span class="n">old_attrib</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">attr</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">new_attrib</span><span class="p">:</span>
+                <span class="n">attrib_changes</span><span class="p">[</span><span class="n">attr</span><span class="p">]</span> <span class="o">=</span> <span class="n">REMOVED_VALUE</span>
+
+    <span class="k">return</span> <span class="n">attrib_changes</span></div>
+
+
+<div class="viewcode-block" id="prepare_entity_changes"><a class="viewcode-back" href="../../ayon_api.utils.html#ayon_api.prepare_entity_changes">[docs]</a><span class="k">def</span> <span class="nf">prepare_entity_changes</span><span class="p">(</span><span class="n">old_entity</span><span class="p">,</span> <span class="n">new_entity</span><span class="p">,</span> <span class="n">replace</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Prepare changes of entities.&quot;&quot;&quot;</span>
+    <span class="n">changes</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">new_value</span> <span class="ow">in</span> <span class="n">new_entity</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="k">if</span> <span class="n">key</span> <span class="o">==</span> <span class="s2">&quot;attrib&quot;</span><span class="p">:</span>
+            <span class="k">continue</span>
+
+        <span class="n">old_value</span> <span class="o">=</span> <span class="n">old_entity</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">old_value</span> <span class="o">!=</span> <span class="n">new_value</span><span class="p">:</span>
+            <span class="n">changes</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">new_value</span>
+
+    <span class="k">if</span> <span class="n">replace</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">old_entity</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">key</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">new_entity</span><span class="p">:</span>
+                <span class="n">changes</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">REMOVED_VALUE</span>
+
+    <span class="n">attr_changes</span> <span class="o">=</span> <span class="n">prepare_attribute_changes</span><span class="p">(</span><span class="n">old_entity</span><span class="p">,</span> <span class="n">new_entity</span><span class="p">,</span> <span class="n">replace</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">attr_changes</span><span class="p">:</span>
+        <span class="n">changes</span><span class="p">[</span><span class="s2">&quot;attrib&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">attr_changes</span>
+    <span class="k">return</span> <span class="n">changes</span></div>
+
+
+<span class="k">def</span> <span class="nf">_try_parse_url</span><span class="p">(</span><span class="n">url</span><span class="p">):</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">urlparse</span><span class="p">(</span><span class="n">url</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">BaseException</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">None</span>
+
+
+<span class="k">def</span> <span class="nf">_try_connect_to_server</span><span class="p">(</span><span class="n">url</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">timeout</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">timeout</span> <span class="o">=</span> <span class="n">get_default_timeout</span><span class="p">()</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="c1"># TODO add validation if the url lead to AYON server</span>
+        <span class="c1">#   - this won&#39;t validate if the url lead to &#39;google.com&#39;</span>
+        <span class="n">requests</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">url</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="n">timeout</span><span class="p">)</span>
+
+    <span class="k">except</span> <span class="ne">BaseException</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">False</span>
+    <span class="k">return</span> <span class="kc">True</span>
+
+
+<div class="viewcode-block" id="login_to_server"><a class="viewcode-back" href="../../ayon_api.utils.html#ayon_api.login_to_server">[docs]</a><span class="k">def</span> <span class="nf">login_to_server</span><span class="p">(</span><span class="n">url</span><span class="p">,</span> <span class="n">username</span><span class="p">,</span> <span class="n">password</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Use login to the server to receive token.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        url (str): Server url.</span>
+<span class="sd">        username (str): User&#39;s username.</span>
+<span class="sd">        password (str): User&#39;s password.</span>
+<span class="sd">        timeout (Optional[float]): Timeout for request. Value from</span>
+<span class="sd">            &#39;get_default_timeout&#39; is used if not specified.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        Union[str, None]: User&#39;s token if login was successfull.</span>
+<span class="sd">            Otherwise &#39;None&#39;.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">timeout</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">timeout</span> <span class="o">=</span> <span class="n">get_default_timeout</span><span class="p">()</span>
+    <span class="n">headers</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;Content-Type&quot;</span><span class="p">:</span> <span class="s2">&quot;application/json&quot;</span><span class="p">}</span>
+    <span class="n">response</span> <span class="o">=</span> <span class="n">requests</span><span class="o">.</span><span class="n">post</span><span class="p">(</span>
+        <span class="s2">&quot;</span><span class="si">{}</span><span class="s2">/api/auth/login&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">url</span><span class="p">),</span>
+        <span class="n">headers</span><span class="o">=</span><span class="n">headers</span><span class="p">,</span>
+        <span class="n">json</span><span class="o">=</span><span class="p">{</span>
+            <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="n">username</span><span class="p">,</span>
+            <span class="s2">&quot;password&quot;</span><span class="p">:</span> <span class="n">password</span>
+        <span class="p">},</span>
+        <span class="n">timeout</span><span class="o">=</span><span class="n">timeout</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="n">token</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="c1"># 200 - success</span>
+    <span class="c1"># 401 - invalid credentials</span>
+    <span class="c1"># *   - other issues</span>
+    <span class="k">if</span> <span class="n">response</span><span class="o">.</span><span class="n">status_code</span> <span class="o">==</span> <span class="mi">200</span><span class="p">:</span>
+        <span class="n">token</span> <span class="o">=</span> <span class="n">response</span><span class="o">.</span><span class="n">json</span><span class="p">()[</span><span class="s2">&quot;token&quot;</span><span class="p">]</span>
+    <span class="k">return</span> <span class="n">token</span></div>
+
+
+<div class="viewcode-block" id="logout_from_server"><a class="viewcode-back" href="../../ayon_api.utils.html#ayon_api.logout_from_server">[docs]</a><span class="k">def</span> <span class="nf">logout_from_server</span><span class="p">(</span><span class="n">url</span><span class="p">,</span> <span class="n">token</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Logout from server and throw token away.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        url (str): Url from which should be logged out.</span>
+<span class="sd">        token (str): Token which should be used to log out.</span>
+<span class="sd">        timeout (Optional[float]): Timeout for request. Value from</span>
+<span class="sd">            &#39;get_default_timeout&#39; is used if not specified.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">timeout</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">timeout</span> <span class="o">=</span> <span class="n">get_default_timeout</span><span class="p">()</span>
+    <span class="n">headers</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s2">&quot;Content-Type&quot;</span><span class="p">:</span> <span class="s2">&quot;application/json&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;Authorization&quot;</span><span class="p">:</span> <span class="s2">&quot;Bearer </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">token</span><span class="p">)</span>
+    <span class="p">}</span>
+    <span class="n">requests</span><span class="o">.</span><span class="n">post</span><span class="p">(</span>
+        <span class="n">url</span> <span class="o">+</span> <span class="s2">&quot;/api/auth/logout&quot;</span><span class="p">,</span>
+        <span class="n">headers</span><span class="o">=</span><span class="n">headers</span><span class="p">,</span>
+        <span class="n">timeout</span><span class="o">=</span><span class="n">timeout</span><span class="p">,</span>
+    <span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="get_user_by_token"><a class="viewcode-back" href="../../ayon_api.utils.html#ayon_api.get_user_by_token">[docs]</a><span class="k">def</span> <span class="nf">get_user_by_token</span><span class="p">(</span><span class="n">url</span><span class="p">,</span> <span class="n">token</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Get user information by url and token.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        url (str): Server url.</span>
+<span class="sd">        token (str): User&#39;s token.</span>
+<span class="sd">        timeout (Optional[float]): Timeout for request. Value from</span>
+<span class="sd">            &#39;get_default_timeout&#39; is used if not specified.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        Optional[Dict[str, Any]]: User information if url and token are valid.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">timeout</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">timeout</span> <span class="o">=</span> <span class="n">get_default_timeout</span><span class="p">()</span>
+
+    <span class="n">base_headers</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s2">&quot;Content-Type&quot;</span><span class="p">:</span> <span class="s2">&quot;application/json&quot;</span><span class="p">,</span>
+    <span class="p">}</span>
+    <span class="k">for</span> <span class="n">header_value</span> <span class="ow">in</span> <span class="p">(</span>
+        <span class="p">{</span><span class="s2">&quot;Authorization&quot;</span><span class="p">:</span> <span class="s2">&quot;Bearer </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">token</span><span class="p">)},</span>
+        <span class="p">{</span><span class="s2">&quot;X-Api-Key&quot;</span><span class="p">:</span> <span class="n">token</span><span class="p">},</span>
+    <span class="p">):</span>
+        <span class="n">headers</span> <span class="o">=</span> <span class="n">base_headers</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        <span class="n">headers</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">header_value</span><span class="p">)</span>
+        <span class="n">response</span> <span class="o">=</span> <span class="n">requests</span><span class="o">.</span><span class="n">get</span><span class="p">(</span>
+            <span class="s2">&quot;</span><span class="si">{}</span><span class="s2">/api/users/me&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">url</span><span class="p">),</span>
+            <span class="n">headers</span><span class="o">=</span><span class="n">headers</span><span class="p">,</span>
+            <span class="n">timeout</span><span class="o">=</span><span class="n">timeout</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="k">if</span> <span class="n">response</span><span class="o">.</span><span class="n">status_code</span> <span class="o">==</span> <span class="mi">200</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">response</span><span class="o">.</span><span class="n">json</span><span class="p">()</span>
+    <span class="k">return</span> <span class="kc">None</span></div>
+
+
+<div class="viewcode-block" id="is_token_valid"><a class="viewcode-back" href="../../ayon_api.utils.html#ayon_api.is_token_valid">[docs]</a><span class="k">def</span> <span class="nf">is_token_valid</span><span class="p">(</span><span class="n">url</span><span class="p">,</span> <span class="n">token</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Check if token is valid.</span>
+
+<span class="sd">    Token can be a user token or service api key.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        url (str): Server url.</span>
+<span class="sd">        token (str): User&#39;s token.</span>
+<span class="sd">        timeout (Optional[float]): Timeout for request. Value from</span>
+<span class="sd">            &#39;get_default_timeout&#39; is used if not specified.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        bool: True if token is valid.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">get_user_by_token</span><span class="p">(</span><span class="n">url</span><span class="p">,</span> <span class="n">token</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="n">timeout</span><span class="p">):</span>
+        <span class="k">return</span> <span class="kc">True</span>
+    <span class="k">return</span> <span class="kc">False</span></div>
+
+
+<div class="viewcode-block" id="validate_url"><a class="viewcode-back" href="../../ayon_api.utils.html#ayon_api.validate_url">[docs]</a><span class="k">def</span> <span class="nf">validate_url</span><span class="p">(</span><span class="n">url</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Validate url if is valid and server is available.</span>
+
+<span class="sd">    Validation checks if can be parsed as url and contains scheme.</span>
+
+<span class="sd">    Function will try to autofix url thus will return modified url when</span>
+<span class="sd">    connection to server works.</span>
+
+<span class="sd">    .. highlight:: python</span>
+<span class="sd">    .. code-block:: python</span>
+
+<span class="sd">        my_url = &quot;my.server.url&quot;</span>
+<span class="sd">        try:</span>
+<span class="sd">            # Store new url</span>
+<span class="sd">            validated_url = validate_url(my_url)</span>
+
+<span class="sd">        except UrlError:</span>
+<span class="sd">            # Handle invalid url</span>
+<span class="sd">            ...</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        url (str): Server url.</span>
+<span class="sd">        timeout (Optional[int]): Timeout in seconds for connection to server.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        Url which was used to connect to server.</span>
+
+<span class="sd">    Raises:</span>
+<span class="sd">        UrlError: Error with short description and hints for user.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">stripperd_url</span> <span class="o">=</span> <span class="n">url</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">stripperd_url</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="n">UrlError</span><span class="p">(</span>
+            <span class="s2">&quot;Invalid url format. Url is empty.&quot;</span><span class="p">,</span>
+            <span class="n">title</span><span class="o">=</span><span class="s2">&quot;Invalid url format&quot;</span><span class="p">,</span>
+            <span class="n">hints</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;url seems to be empty&quot;</span><span class="p">]</span>
+        <span class="p">)</span>
+
+    <span class="c1"># Not sure if this is good idea?</span>
+    <span class="n">modified_url</span> <span class="o">=</span> <span class="n">stripperd_url</span><span class="o">.</span><span class="n">rstrip</span><span class="p">(</span><span class="s2">&quot;/&quot;</span><span class="p">)</span>
+    <span class="n">parsed_url</span> <span class="o">=</span> <span class="n">_try_parse_url</span><span class="p">(</span><span class="n">modified_url</span><span class="p">)</span>
+    <span class="n">universal_hints</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="s2">&quot;does the url work in browser?&quot;</span>
+    <span class="p">]</span>
+    <span class="k">if</span> <span class="n">parsed_url</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="n">UrlError</span><span class="p">(</span>
+            <span class="s2">&quot;Invalid url format. Url cannot be parsed as url </span><span class="se">\&quot;</span><span class="si">{}</span><span class="se">\&quot;</span><span class="s2">.&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                <span class="n">modified_url</span>
+            <span class="p">),</span>
+            <span class="n">title</span><span class="o">=</span><span class="s2">&quot;Invalid url format&quot;</span><span class="p">,</span>
+            <span class="n">hints</span><span class="o">=</span><span class="n">universal_hints</span>
+        <span class="p">)</span>
+
+    <span class="c1"># Try add &#39;https://&#39; scheme if is missing</span>
+    <span class="c1"># - this will trigger UrlError if both will crash</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">parsed_url</span><span class="o">.</span><span class="n">scheme</span><span class="p">:</span>
+        <span class="n">new_url</span> <span class="o">=</span> <span class="s2">&quot;https://&quot;</span> <span class="o">+</span> <span class="n">modified_url</span>
+        <span class="k">if</span> <span class="n">_try_connect_to_server</span><span class="p">(</span><span class="n">new_url</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="n">timeout</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">new_url</span>
+
+    <span class="k">if</span> <span class="n">_try_connect_to_server</span><span class="p">(</span><span class="n">modified_url</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="n">timeout</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">modified_url</span>
+
+    <span class="n">hints</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">if</span> <span class="s2">&quot;/&quot;</span> <span class="ow">in</span> <span class="n">parsed_url</span><span class="o">.</span><span class="n">path</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">parsed_url</span><span class="o">.</span><span class="n">scheme</span><span class="p">:</span>
+        <span class="n">new_path</span> <span class="o">=</span> <span class="n">parsed_url</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;/&quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">parsed_url</span><span class="o">.</span><span class="n">scheme</span><span class="p">:</span>
+            <span class="n">new_path</span> <span class="o">=</span> <span class="s2">&quot;https://&quot;</span> <span class="o">+</span> <span class="n">new_path</span>
+
+        <span class="n">hints</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+            <span class="s2">&quot;did you mean </span><span class="se">\&quot;</span><span class="si">{}</span><span class="se">\&quot;</span><span class="s2">?&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">parsed_url</span><span class="o">.</span><span class="n">scheme</span> <span class="o">+</span> <span class="n">new_path</span><span class="p">)</span>
+        <span class="p">)</span>
+
+    <span class="k">raise</span> <span class="n">UrlError</span><span class="p">(</span>
+        <span class="s2">&quot;Couldn&#39;t connect to server on </span><span class="se">\&quot;</span><span class="si">{}</span><span class="se">\&quot;</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">url</span><span class="p">),</span>
+        <span class="n">title</span><span class="o">=</span><span class="s2">&quot;Couldn&#39;t connect to server&quot;</span><span class="p">,</span>
+        <span class="n">hints</span><span class="o">=</span><span class="n">hints</span> <span class="o">+</span> <span class="n">universal_hints</span>
+    <span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="TransferProgress"><a class="viewcode-back" href="../../ayon_api.utils.html#ayon_api.TransferProgress">[docs]</a><span class="k">class</span> <span class="nc">TransferProgress</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Object to store progress of download/upload from/to server.&quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_started</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_transfer_done</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_transferred</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_content_size</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_failed</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_fail_reason</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_source_url</span> <span class="o">=</span> <span class="s2">&quot;N/A&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_destination_url</span> <span class="o">=</span> <span class="s2">&quot;N/A&quot;</span>
+
+<div class="viewcode-block" id="TransferProgress.get_content_size"><a class="viewcode-back" href="../../ayon_api.utils.html#ayon_api.TransferProgress.get_content_size">[docs]</a>    <span class="k">def</span> <span class="nf">get_content_size</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Content size in bytes.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Union[int, None]: Content size in bytes or None</span>
+<span class="sd">                if is unknown.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_content_size</span></div>
+
+<div class="viewcode-block" id="TransferProgress.set_content_size"><a class="viewcode-back" href="../../ayon_api.utils.html#ayon_api.TransferProgress.set_content_size">[docs]</a>    <span class="k">def</span> <span class="nf">set_content_size</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">content_size</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Set content size in bytes.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            content_size (int): Content size in bytes.</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            ValueError: If content size was already set.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_content_size</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Content size was set more then once&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_content_size</span> <span class="o">=</span> <span class="n">content_size</span></div>
+
+<div class="viewcode-block" id="TransferProgress.get_started"><a class="viewcode-back" href="../../ayon_api.utils.html#ayon_api.TransferProgress.get_started">[docs]</a>    <span class="k">def</span> <span class="nf">get_started</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Transfer was started.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            bool: True if transfer started.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_started</span></div>
+
+<div class="viewcode-block" id="TransferProgress.set_started"><a class="viewcode-back" href="../../ayon_api.utils.html#ayon_api.TransferProgress.set_started">[docs]</a>    <span class="k">def</span> <span class="nf">set_started</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Mark that transfer started.</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            ValueError: If transfer was already started.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_started</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Progress already started&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_started</span> <span class="o">=</span> <span class="kc">True</span></div>
+
+<div class="viewcode-block" id="TransferProgress.get_transfer_done"><a class="viewcode-back" href="../../ayon_api.utils.html#ayon_api.TransferProgress.get_transfer_done">[docs]</a>    <span class="k">def</span> <span class="nf">get_transfer_done</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Transfer finished.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            bool: Transfer finished.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_transfer_done</span></div>
+
+<div class="viewcode-block" id="TransferProgress.set_transfer_done"><a class="viewcode-back" href="../../ayon_api.utils.html#ayon_api.TransferProgress.set_transfer_done">[docs]</a>    <span class="k">def</span> <span class="nf">set_transfer_done</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Mark progress as transfer finished.</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            ValueError: If progress was already marked as done</span>
+<span class="sd">                or wasn&#39;t started yet.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_transfer_done</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Progress was already marked as done&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_started</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Progress didn&#39;t start yet&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_transfer_done</span> <span class="o">=</span> <span class="kc">True</span></div>
+
+<div class="viewcode-block" id="TransferProgress.get_failed"><a class="viewcode-back" href="../../ayon_api.utils.html#ayon_api.TransferProgress.get_failed">[docs]</a>    <span class="k">def</span> <span class="nf">get_failed</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Transfer failed.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            bool: True if transfer failed.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_failed</span></div>
+
+<div class="viewcode-block" id="TransferProgress.get_fail_reason"><a class="viewcode-back" href="../../ayon_api.utils.html#ayon_api.TransferProgress.get_fail_reason">[docs]</a>    <span class="k">def</span> <span class="nf">get_fail_reason</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Get reason why transfer failed.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Union[str, None]: Reason why transfer</span>
+<span class="sd">                failed or None.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_fail_reason</span></div>
+
+<div class="viewcode-block" id="TransferProgress.set_failed"><a class="viewcode-back" href="../../ayon_api.utils.html#ayon_api.TransferProgress.set_failed">[docs]</a>    <span class="k">def</span> <span class="nf">set_failed</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">reason</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Mark progress as failed.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            reason (str): Reason why transfer failed.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_fail_reason</span> <span class="o">=</span> <span class="n">reason</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_failed</span> <span class="o">=</span> <span class="kc">True</span></div>
+
+<div class="viewcode-block" id="TransferProgress.get_transferred_size"><a class="viewcode-back" href="../../ayon_api.utils.html#ayon_api.TransferProgress.get_transferred_size">[docs]</a>    <span class="k">def</span> <span class="nf">get_transferred_size</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Already transferred size in bytes.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            int: Already transferred size in bytes.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_transferred</span></div>
+
+<div class="viewcode-block" id="TransferProgress.set_transferred_size"><a class="viewcode-back" href="../../ayon_api.utils.html#ayon_api.TransferProgress.set_transferred_size">[docs]</a>    <span class="k">def</span> <span class="nf">set_transferred_size</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">transferred</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Set already transferred size in bytes.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            transferred (int): Already transferred size in bytes.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_transferred</span> <span class="o">=</span> <span class="n">transferred</span></div>
+
+<div class="viewcode-block" id="TransferProgress.add_transferred_chunk"><a class="viewcode-back" href="../../ayon_api.utils.html#ayon_api.TransferProgress.add_transferred_chunk">[docs]</a>    <span class="k">def</span> <span class="nf">add_transferred_chunk</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">chunk_size</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Add transferred chunk size in bytes.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            chunk_size (int): Add transferred chunk size</span>
+<span class="sd">                in bytes.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_transferred</span> <span class="o">+=</span> <span class="n">chunk_size</span></div>
+
+<div class="viewcode-block" id="TransferProgress.get_source_url"><a class="viewcode-back" href="../../ayon_api.utils.html#ayon_api.TransferProgress.get_source_url">[docs]</a>    <span class="k">def</span> <span class="nf">get_source_url</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Source url from where transfer happens.</span>
+
+<span class="sd">        Note:</span>
+<span class="sd">            Consider this as title. Must be set using</span>
+<span class="sd">                &#39;set_source_url&#39; or &#39;N/A&#39; will be returned.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            str: Source url from where transfer happens.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_source_url</span></div>
+
+<div class="viewcode-block" id="TransferProgress.set_source_url"><a class="viewcode-back" href="../../ayon_api.utils.html#ayon_api.TransferProgress.set_source_url">[docs]</a>    <span class="k">def</span> <span class="nf">set_source_url</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">url</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Set source url from where transfer happens.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            url (str): Source url from where transfer happens.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_source_url</span> <span class="o">=</span> <span class="n">url</span></div>
+
+<div class="viewcode-block" id="TransferProgress.get_destination_url"><a class="viewcode-back" href="../../ayon_api.utils.html#ayon_api.TransferProgress.get_destination_url">[docs]</a>    <span class="k">def</span> <span class="nf">get_destination_url</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Destination url where transfer happens.</span>
+
+<span class="sd">        Note:</span>
+<span class="sd">            Consider this as title. Must be set using</span>
+<span class="sd">                &#39;set_source_url&#39; or &#39;N/A&#39; will be returned.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            str: Destination url where transfer happens.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_destination_url</span></div>
+
+<div class="viewcode-block" id="TransferProgress.set_destination_url"><a class="viewcode-back" href="../../ayon_api.utils.html#ayon_api.TransferProgress.set_destination_url">[docs]</a>    <span class="k">def</span> <span class="nf">set_destination_url</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">url</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Set destination url where transfer happens.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            url (str): Destination url where transfer happens.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_destination_url</span> <span class="o">=</span> <span class="n">url</span></div>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">is_running</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Check if transfer is running.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            bool: True if transfer is running.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="p">(</span>
+            <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">started</span>
+            <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">transfer_done</span>
+            <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">failed</span>
+        <span class="p">):</span>
+            <span class="k">return</span> <span class="kc">False</span>
+        <span class="k">return</span> <span class="kc">True</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">transfer_progress</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Get transfer progress in percents.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Union[float, None]: Transfer progress in percents or &#39;None&#39;</span>
+<span class="sd">                if content size is unknown.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_content_size</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">None</span>
+        <span class="k">return</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_transferred</span> <span class="o">*</span> <span class="mf">100.0</span><span class="p">)</span> <span class="o">/</span> <span class="nb">float</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_content_size</span><span class="p">)</span>
+
+    <span class="n">content_size</span> <span class="o">=</span> <span class="nb">property</span><span class="p">(</span><span class="n">get_content_size</span><span class="p">,</span> <span class="n">set_content_size</span><span class="p">)</span>
+    <span class="n">started</span> <span class="o">=</span> <span class="nb">property</span><span class="p">(</span><span class="n">get_started</span><span class="p">)</span>
+    <span class="n">transfer_done</span> <span class="o">=</span> <span class="nb">property</span><span class="p">(</span><span class="n">get_transfer_done</span><span class="p">)</span>
+    <span class="n">failed</span> <span class="o">=</span> <span class="nb">property</span><span class="p">(</span><span class="n">get_failed</span><span class="p">)</span>
+    <span class="n">fail_reason</span> <span class="o">=</span> <span class="nb">property</span><span class="p">(</span><span class="n">get_fail_reason</span><span class="p">)</span>
+    <span class="n">source_url</span> <span class="o">=</span> <span class="nb">property</span><span class="p">(</span><span class="n">get_source_url</span><span class="p">,</span> <span class="n">set_source_url</span><span class="p">)</span>
+    <span class="n">destination_url</span> <span class="o">=</span> <span class="nb">property</span><span class="p">(</span><span class="n">get_destination_url</span><span class="p">,</span> <span class="n">set_destination_url</span><span class="p">)</span>
+    <span class="n">transferred_size</span> <span class="o">=</span> <span class="nb">property</span><span class="p">(</span><span class="n">get_transferred_size</span><span class="p">,</span> <span class="n">set_transferred_size</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="create_dependency_package_basename"><a class="viewcode-back" href="../../ayon_api.utils.html#ayon_api.create_dependency_package_basename">[docs]</a><span class="k">def</span> <span class="nf">create_dependency_package_basename</span><span class="p">(</span><span class="n">platform_name</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Create basename for dependency package file.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        platform_name (Optional[str]): Name of platform for which the</span>
+<span class="sd">            bundle is targeted. Default value is current platform.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        str: Dependency package name with timestamp and platform.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">platform_name</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">platform_name</span> <span class="o">=</span> <span class="n">platform</span><span class="o">.</span><span class="n">system</span><span class="p">()</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+
+    <span class="n">now_date</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">()</span>
+    <span class="n">time_stamp</span> <span class="o">=</span> <span class="n">now_date</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s2">&quot;%y%m</span><span class="si">%d</span><span class="s2">%H%M&quot;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="s2">&quot;ayon_</span><span class="si">{}</span><span class="s2">_</span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">time_stamp</span><span class="p">,</span> <span class="n">platform_name</span><span class="p">)</span></div>
+
+
+
+<span class="k">def</span> <span class="nf">_get_media_mime_type_from_ftyp</span><span class="p">(</span><span class="n">content</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">content</span><span class="p">[</span><span class="mi">8</span><span class="p">:</span><span class="mi">10</span><span class="p">]</span> <span class="o">==</span> <span class="sa">b</span><span class="s2">&quot;qt&quot;</span> <span class="ow">or</span> <span class="n">content</span><span class="p">[</span><span class="mi">8</span><span class="p">:</span><span class="mi">12</span><span class="p">]</span> <span class="o">==</span> <span class="sa">b</span><span class="s2">&quot;MSNV&quot;</span><span class="p">:</span>
+        <span class="k">return</span> <span class="s2">&quot;video/quicktime&quot;</span>
+
+    <span class="k">if</span> <span class="n">content</span><span class="p">[</span><span class="mi">8</span><span class="p">:</span><span class="mi">12</span><span class="p">]</span> <span class="ow">in</span> <span class="p">(</span><span class="sa">b</span><span class="s2">&quot;3g2a&quot;</span><span class="p">,</span> <span class="sa">b</span><span class="s2">&quot;3g2b&quot;</span><span class="p">,</span> <span class="sa">b</span><span class="s2">&quot;3g2c&quot;</span><span class="p">,</span> <span class="sa">b</span><span class="s2">&quot;KDDI&quot;</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s2">&quot;video/3gpp2&quot;</span>
+
+    <span class="k">if</span> <span class="n">content</span><span class="p">[</span><span class="mi">8</span><span class="p">:</span><span class="mi">12</span><span class="p">]</span> <span class="ow">in</span> <span class="p">(</span>
+        <span class="sa">b</span><span class="s2">&quot;isom&quot;</span><span class="p">,</span> <span class="sa">b</span><span class="s2">&quot;iso2&quot;</span><span class="p">,</span> <span class="sa">b</span><span class="s2">&quot;avc1&quot;</span><span class="p">,</span> <span class="sa">b</span><span class="s2">&quot;F4V&quot;</span><span class="p">,</span> <span class="sa">b</span><span class="s2">&quot;F4P&quot;</span><span class="p">,</span> <span class="sa">b</span><span class="s2">&quot;F4A&quot;</span><span class="p">,</span> <span class="sa">b</span><span class="s2">&quot;F4B&quot;</span><span class="p">,</span> <span class="sa">b</span><span class="s2">&quot;mmp4&quot;</span><span class="p">,</span>
+        <span class="c1"># These might be &quot;video/mp4v&quot;</span>
+        <span class="sa">b</span><span class="s2">&quot;mp41&quot;</span><span class="p">,</span> <span class="sa">b</span><span class="s2">&quot;mp42&quot;</span><span class="p">,</span>
+        <span class="c1"># Nero</span>
+        <span class="sa">b</span><span class="s2">&quot;NDSC&quot;</span><span class="p">,</span> <span class="sa">b</span><span class="s2">&quot;NDSH&quot;</span><span class="p">,</span> <span class="sa">b</span><span class="s2">&quot;NDSM&quot;</span><span class="p">,</span> <span class="sa">b</span><span class="s2">&quot;NDSP&quot;</span><span class="p">,</span> <span class="sa">b</span><span class="s2">&quot;NDSS&quot;</span><span class="p">,</span> <span class="sa">b</span><span class="s2">&quot;NDXC&quot;</span><span class="p">,</span> <span class="sa">b</span><span class="s2">&quot;NDXH&quot;</span><span class="p">,</span>
+        <span class="sa">b</span><span class="s2">&quot;NDXM&quot;</span><span class="p">,</span> <span class="sa">b</span><span class="s2">&quot;NDXP&quot;</span><span class="p">,</span> <span class="sa">b</span><span class="s2">&quot;NDXS&quot;</span><span class="p">,</span>
+    <span class="p">):</span>
+        <span class="k">return</span> <span class="s2">&quot;video/mp4&quot;</span>
+
+    <span class="k">if</span> <span class="n">content</span><span class="p">[</span><span class="mi">8</span><span class="p">:</span><span class="mi">12</span><span class="p">]</span> <span class="ow">in</span> <span class="p">(</span>
+        <span class="sa">b</span><span class="s2">&quot;3ge6&quot;</span><span class="p">,</span> <span class="sa">b</span><span class="s2">&quot;3ge7&quot;</span><span class="p">,</span> <span class="sa">b</span><span class="s2">&quot;3gg6&quot;</span><span class="p">,</span>
+        <span class="sa">b</span><span class="s2">&quot;3gp1&quot;</span><span class="p">,</span> <span class="sa">b</span><span class="s2">&quot;3gp2&quot;</span><span class="p">,</span> <span class="sa">b</span><span class="s2">&quot;3gp3&quot;</span><span class="p">,</span> <span class="sa">b</span><span class="s2">&quot;3gp4&quot;</span><span class="p">,</span> <span class="sa">b</span><span class="s2">&quot;3gp5&quot;</span><span class="p">,</span> <span class="sa">b</span><span class="s2">&quot;3gp6&quot;</span><span class="p">,</span> <span class="sa">b</span><span class="s2">&quot;3gs7&quot;</span><span class="p">,</span>
+    <span class="p">):</span>
+        <span class="k">return</span> <span class="s2">&quot;video/3gpp&quot;</span>
+
+    <span class="k">if</span> <span class="n">content</span><span class="p">[</span><span class="mi">8</span><span class="p">:</span><span class="mi">11</span><span class="p">]</span> <span class="o">==</span> <span class="sa">b</span><span class="s2">&quot;JP2&quot;</span><span class="p">:</span>
+        <span class="k">return</span> <span class="s2">&quot;image/jp2&quot;</span>
+
+    <span class="k">if</span> <span class="n">content</span><span class="p">[</span><span class="mi">8</span><span class="p">:</span><span class="mi">11</span><span class="p">]</span> <span class="o">==</span> <span class="sa">b</span><span class="s2">&quot;jpm&quot;</span><span class="p">:</span>
+        <span class="k">return</span> <span class="s2">&quot;image/jpm&quot;</span>
+
+    <span class="k">if</span> <span class="n">content</span><span class="p">[</span><span class="mi">8</span><span class="p">:</span><span class="mi">11</span><span class="p">]</span> <span class="o">==</span> <span class="sa">b</span><span class="s2">&quot;jpx&quot;</span><span class="p">:</span>
+        <span class="k">return</span> <span class="s2">&quot;image/jpx&quot;</span>
+
+    <span class="k">if</span> <span class="n">content</span><span class="p">[</span><span class="mi">8</span><span class="p">:</span><span class="mi">12</span><span class="p">]</span> <span class="ow">in</span> <span class="p">(</span><span class="sa">b</span><span class="s2">&quot;M4V</span><span class="se">\x20</span><span class="s2">&quot;</span><span class="p">,</span> <span class="sa">b</span><span class="s2">&quot;M4VH&quot;</span><span class="p">,</span> <span class="sa">b</span><span class="s2">&quot;M4VP&quot;</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s2">&quot;video/x-m4v&quot;</span>
+
+    <span class="k">if</span> <span class="n">content</span><span class="p">[</span><span class="mi">8</span><span class="p">:</span><span class="mi">12</span><span class="p">]</span> <span class="ow">in</span> <span class="p">(</span><span class="sa">b</span><span class="s2">&quot;mj2s&quot;</span><span class="p">,</span> <span class="sa">b</span><span class="s2">&quot;mjp2&quot;</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s2">&quot;video/mj2&quot;</span>
+    <span class="k">return</span> <span class="kc">None</span>
+
+
+<span class="k">def</span> <span class="nf">_get_media_mime_type_for_content_base</span><span class="p">(</span><span class="n">content</span><span class="p">:</span> <span class="nb">bytes</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Determine Mime-Type of a file.</span>
+
+<span class="sd">    Use header of the file to determine mime type (needs 12 bytes).</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">content_len</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">content</span><span class="p">)</span>
+    <span class="c1"># Pre-validation (largest definition check)</span>
+    <span class="c1"># - hopefully there cannot be media defined in less than 12 bytes</span>
+    <span class="k">if</span> <span class="n">content_len</span> <span class="o">&lt;</span> <span class="mi">12</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">None</span>
+
+    <span class="c1"># FTYP</span>
+    <span class="k">if</span> <span class="n">content</span><span class="p">[</span><span class="mi">4</span><span class="p">:</span><span class="mi">8</span><span class="p">]</span> <span class="o">==</span> <span class="sa">b</span><span class="s2">&quot;ftyp&quot;</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">_get_media_mime_type_from_ftyp</span><span class="p">(</span><span class="n">content</span><span class="p">)</span>
+
+    <span class="c1"># BMP</span>
+    <span class="k">if</span> <span class="n">content</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">2</span><span class="p">]</span> <span class="o">==</span> <span class="sa">b</span><span class="s2">&quot;BM&quot;</span><span class="p">:</span>
+        <span class="k">return</span> <span class="s2">&quot;image/bmp&quot;</span>
+
+    <span class="c1"># Tiff</span>
+    <span class="k">if</span> <span class="n">content</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">2</span><span class="p">]</span> <span class="ow">in</span> <span class="p">(</span><span class="sa">b</span><span class="s2">&quot;MM&quot;</span><span class="p">,</span> <span class="sa">b</span><span class="s2">&quot;II&quot;</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s2">&quot;tiff&quot;</span>
+
+    <span class="c1"># PNG</span>
+    <span class="k">if</span> <span class="n">content</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">4</span><span class="p">]</span> <span class="o">==</span> <span class="sa">b</span><span class="s2">&quot;</span><span class="se">\211</span><span class="s2">PNG&quot;</span><span class="p">:</span>
+        <span class="k">return</span> <span class="s2">&quot;image/png&quot;</span>
+
+    <span class="c1"># JPEG, JFIF or Exif</span>
+    <span class="k">if</span> <span class="p">(</span>
+        <span class="n">content</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">4</span><span class="p">]</span> <span class="o">==</span> <span class="sa">b</span><span class="s2">&quot;</span><span class="se">\xff\xd8\xff\xdb</span><span class="s2">&quot;</span>
+        <span class="ow">or</span> <span class="n">content</span><span class="p">[</span><span class="mi">6</span><span class="p">:</span><span class="mi">10</span><span class="p">]</span> <span class="ow">in</span> <span class="p">(</span><span class="sa">b</span><span class="s2">&quot;JFIF&quot;</span><span class="p">,</span> <span class="sa">b</span><span class="s2">&quot;Exif&quot;</span><span class="p">)</span>
+    <span class="p">):</span>
+        <span class="k">return</span> <span class="s2">&quot;image/jpeg&quot;</span>
+
+    <span class="c1"># Webp</span>
+    <span class="k">if</span> <span class="n">content</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">4</span><span class="p">]</span> <span class="o">==</span> <span class="sa">b</span><span class="s2">&quot;RIFF&quot;</span> <span class="ow">and</span> <span class="n">content</span><span class="p">[</span><span class="mi">8</span><span class="p">:</span><span class="mi">12</span><span class="p">]</span> <span class="o">==</span> <span class="sa">b</span><span class="s2">&quot;WEBP&quot;</span><span class="p">:</span>
+        <span class="k">return</span> <span class="s2">&quot;image/webp&quot;</span>
+
+    <span class="c1"># Gif</span>
+    <span class="k">if</span> <span class="n">content</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">6</span><span class="p">]</span> <span class="ow">in</span> <span class="p">(</span><span class="sa">b</span><span class="s2">&quot;GIF87a&quot;</span><span class="p">,</span> <span class="sa">b</span><span class="s2">&quot;GIF89a&quot;</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s2">&quot;gif&quot;</span>
+
+    <span class="c1"># Adobe PhotoShop file (8B &gt; Adobe, PS &gt; PhotoShop)</span>
+    <span class="k">if</span> <span class="n">content</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">4</span><span class="p">]</span> <span class="o">==</span> <span class="sa">b</span><span class="s2">&quot;8BPS&quot;</span><span class="p">:</span>
+        <span class="k">return</span> <span class="s2">&quot;image/vnd.adobe.photoshop&quot;</span>
+
+    <span class="c1"># Windows ICO &gt; this might be wild guess as multiple files can start</span>
+    <span class="c1">#   with this header</span>
+    <span class="k">if</span> <span class="n">content</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">4</span><span class="p">]</span> <span class="o">==</span> <span class="sa">b</span><span class="s2">&quot;</span><span class="se">\x00\x00\x01\x00</span><span class="s2">&quot;</span><span class="p">:</span>
+        <span class="k">return</span> <span class="s2">&quot;image/x-icon&quot;</span>
+    <span class="k">return</span> <span class="kc">None</span>
+
+
+<span class="k">def</span> <span class="nf">_get_svg_mime_type</span><span class="p">(</span><span class="n">content</span><span class="p">:</span> <span class="nb">bytes</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+    <span class="c1"># SVG</span>
+    <span class="k">if</span> <span class="sa">b</span><span class="s1">&#39;xmlns=&quot;http://www.w3.org/2000/svg&quot;&#39;</span> <span class="ow">in</span> <span class="n">content</span><span class="p">:</span>
+        <span class="k">return</span> <span class="s2">&quot;image/svg+xml&quot;</span>
+    <span class="k">return</span> <span class="kc">None</span>
+
+
+<div class="viewcode-block" id="get_media_mime_type_for_content"><a class="viewcode-back" href="../../ayon_api.utils.html#ayon_api.get_media_mime_type_for_content">[docs]</a><span class="k">def</span> <span class="nf">get_media_mime_type_for_content</span><span class="p">(</span><span class="n">content</span><span class="p">:</span> <span class="nb">bytes</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+    <span class="n">mime_type</span> <span class="o">=</span> <span class="n">_get_media_mime_type_for_content_base</span><span class="p">(</span><span class="n">content</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">mime_type</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">mime_type</span>
+    <span class="k">return</span> <span class="n">_get_svg_mime_type</span><span class="p">(</span><span class="n">content</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="get_media_mime_type_for_stream"><a class="viewcode-back" href="../../ayon_api.utils.html#ayon_api.get_media_mime_type_for_stream">[docs]</a><span class="k">def</span> <span class="nf">get_media_mime_type_for_stream</span><span class="p">(</span><span class="n">stream</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+    <span class="c1"># Read only 12 bytes to determine mime type</span>
+    <span class="n">content</span> <span class="o">=</span> <span class="n">stream</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="mi">12</span><span class="p">)</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">content</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">12</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">None</span>
+    <span class="n">mime_type</span> <span class="o">=</span> <span class="n">_get_media_mime_type_for_content_base</span><span class="p">(</span><span class="n">content</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">mime_type</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">content</span> <span class="o">+=</span> <span class="n">stream</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
+        <span class="n">mime_type</span> <span class="o">=</span> <span class="n">_get_svg_mime_type</span><span class="p">(</span><span class="n">content</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">mime_type</span></div>
+
+
+<div class="viewcode-block" id="get_media_mime_type"><a class="viewcode-back" href="../../ayon_api.utils.html#ayon_api.get_media_mime_type">[docs]</a><span class="k">def</span> <span class="nf">get_media_mime_type</span><span class="p">(</span><span class="n">filepath</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Determine Mime-Type of a file.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        filepath (str): Path to file.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        Optional[str]: Mime type or None if is unknown mime type.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">filepath</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">filepath</span><span class="p">):</span>
+        <span class="k">return</span> <span class="kc">None</span>
+
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">filepath</span><span class="p">,</span> <span class="s2">&quot;rb&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">stream</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">get_media_mime_type_for_stream</span><span class="p">(</span><span class="n">stream</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="take_web_action_event"><a class="viewcode-back" href="../../ayon_api.utils.html#ayon_api.take_web_action_event">[docs]</a><span class="k">def</span> <span class="nf">take_web_action_event</span><span class="p">(</span>
+    <span class="n">server_url</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+    <span class="n">action_token</span><span class="p">:</span> <span class="nb">str</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Take web action event using action token.</span>
+
+<span class="sd">    Action token is generated by AYON server and passed to AYON launcher.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        server_url (str): AYON server url.</span>
+<span class="sd">        action_token (str): Action token.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        Dict[str, Any]: Web action event.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">response</span> <span class="o">=</span> <span class="n">requests</span><span class="o">.</span><span class="n">get</span><span class="p">(</span>
+        <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">server_url</span><span class="si">}</span><span class="s2">/api/actions/take/</span><span class="si">{</span><span class="n">action_token</span><span class="si">}</span><span class="s2">&quot;</span>
+    <span class="p">)</span>
+    <span class="n">response</span><span class="o">.</span><span class="n">raise_for_status</span><span class="p">()</span>
+    <span class="k">return</span> <span class="n">response</span><span class="o">.</span><span class="n">json</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="abort_web_action_event"><a class="viewcode-back" href="../../ayon_api.utils.html#ayon_api.abort_web_action_event">[docs]</a><span class="k">def</span> <span class="nf">abort_web_action_event</span><span class="p">(</span>
+    <span class="n">server_url</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+    <span class="n">action_token</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+    <span class="n">reason</span><span class="p">:</span> <span class="nb">str</span>
+<span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Abort web action event using action token.</span>
+
+<span class="sd">    A web action event could not be processed for some reason.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        server_url (str): AYON server url.</span>
+<span class="sd">        action_token (str): Action token.</span>
+<span class="sd">        reason (str): Reason why webaction event was aborted.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        requests.Response: Response from server.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">response</span> <span class="o">=</span> <span class="n">requests</span><span class="o">.</span><span class="n">post</span><span class="p">(</span>
+        <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">server_url</span><span class="si">}</span><span class="s2">/api/actions/abort/</span><span class="si">{</span><span class="n">action_token</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
+        <span class="n">json</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;message&quot;</span><span class="p">:</span> <span class="n">reason</span><span class="p">},</span>
+    <span class="p">)</span>
+    <span class="n">response</span><span class="o">.</span><span class="n">raise_for_status</span><span class="p">()</span>
+    <span class="k">return</span> <span class="n">response</span></div>
+</pre></div>
+
+					 </div>
+					 
+					</div>
+					<footer>
+  
+
+  <div role="contentinfo">
+    <p>
+        
+        &copy; Copyright 2024, ynput.io <info@ynput.io>
+	  <br>
+      
+      
+      
+      Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+      
+      <a href="https://github.com/revitron/revitron-sphinx-theme">theme</a>
+      
+      provided by <a href="https://github.com/revitron">Revitron</a>.
+
+    </p>
+  </div> 
+
+</footer>
+
+				</div>
+			</div>
+
+		</section>
+
+	</div>
+	
+
+	<script type="text/javascript">
+			jQuery(function () {
+					SphinxRtdTheme.Navigation.enable(true);
+			});
+	</script>
+
+	
+	
+		
+	 
+
+ 
+</body>	
+</html>

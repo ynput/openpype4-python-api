@@ -1,0 +1,1250 @@
+
+	
+
+<!DOCTYPE html>
+<html class="writer-html5 " lang="en" >
+<head>
+	<meta charset="utf-8">
+	
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	
+		<title>ayon_api.graphql &mdash; ayon-python-api 1.0.11 documentation</title>
+	
+	
+	
+	<link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+	<link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+	<link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+	<link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+
+	
+	
+		<link rel="shortcut icon" href="../../_static/favicon.ico"/>
+	
+	
+	
+		<link rel="canonical" href="https://github.com/ynput/ayon-python-api_modules/ayon_api/graphql.html"/>
+	
+
+	
+	<!--[if lt IE 9]>
+		<script src="../../_static/js/html5shiv.min.js"></script>
+	<![endif]-->
+	
+		
+			<script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+				<script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+				<script src="../../_static/jquery.js"></script>
+				<script src="../../_static/underscore.js"></script>
+				<script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+				<script src="../../_static/doctools.js"></script>
+				<script src="../../_static/sphinx_highlight.js"></script>
+		
+		<script type="text/javascript" src="../../_static/js/theme.js"></script>
+
+		
+		<link rel="index" title="Index" href="../../genindex.html" />
+		<link rel="search" title="Search" href="../../search.html" /> 
+</head>
+<body class="wy-body-for-nav">
+
+
+	 
+	<div class="wy-grid-for-nav">
+		
+		<nav data-toggle="wy-nav-shift" class="wy-nav-side">
+			<div class="wy-side-scroll">
+				<div class="wy-side-nav-search">
+					
+						<div class="brand">
+							<a href="../../index.html">
+							
+								<img src="../../_static/AYON_blackG_dot.svg" class="logo" alt="Logo"/>
+							
+							</a>
+						</div>
+						
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+					
+				</div>
+				
+				<div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+					
+						
+						
+							
+						
+						
+							<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../modules.html">ayon_api</a></li>
+</ul>
+
+						
+					
+				</div>
+				
+			</div>
+		</nav>
+
+		<section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+			
+			<nav class="wy-nav-top" aria-label="top navigation">
+			
+				<i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+				<a href="../../index.html">
+					
+						<img src="../../_static/AYON_blackG_dot.svg" class="logo" alt="Logo"/>
+					
+				</a>
+			
+			</nav>
+
+
+			<div class="wy-nav-content">
+				
+				<div class="rst-content">
+				
+					<div role="navigation" aria-label="breadcrumbs navigation">
+
+	<ul class="wy-breadcrumbs">
+		
+			
+				<li><a href="../../index.html">ayon-python-api</a> ⁄&nbsp;</li>
+				
+					<li><a href="../index.html">Module code</a> ⁄&nbsp;</li>
+				
+				<li><a href="">ayon_api.graphql</a></li>
+			
+		
+		
+			<li class="wy-breadcrumbs-aside">
+			
+				<a href="https://github.com/ynput/ayon-python-api" class="fa fa-github-alt"></a>
+			
+			</li>
+		
+	</ul>
+
+</div>
+					<div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+					 <div itemprop="articleBody">
+						
+  <h1>Source code for ayon_api.graphql</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">copy</span>
+<span class="kn">import</span> <span class="nn">numbers</span>
+<span class="kn">from</span> <span class="nn">abc</span> <span class="kn">import</span> <span class="n">ABC</span><span class="p">,</span> <span class="n">abstractmethod</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Iterable</span>
+
+<span class="kn">from</span> <span class="nn">.exceptions</span> <span class="kn">import</span> <span class="n">GraphQlQueryFailed</span>
+<span class="kn">from</span> <span class="nn">.utils</span> <span class="kn">import</span> <span class="n">SortOrder</span>
+
+<span class="n">FIELD_VALUE</span> <span class="o">=</span> <span class="nb">object</span><span class="p">()</span>
+
+
+<div class="viewcode-block" id="fields_to_dict"><a class="viewcode-back" href="../../ayon_api.graphql.html#ayon_api.graphql.fields_to_dict">[docs]</a><span class="k">def</span> <span class="nf">fields_to_dict</span><span class="p">(</span><span class="n">fields</span><span class="p">):</span>
+    <span class="n">output</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">fields</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">output</span>
+
+    <span class="k">for</span> <span class="n">field</span> <span class="ow">in</span> <span class="n">fields</span><span class="p">:</span>
+        <span class="n">hierarchy</span> <span class="o">=</span> <span class="n">field</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;.&quot;</span><span class="p">)</span>
+        <span class="n">last</span> <span class="o">=</span> <span class="n">hierarchy</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">value</span> <span class="o">=</span> <span class="n">output</span>
+        <span class="k">for</span> <span class="n">part</span> <span class="ow">in</span> <span class="n">hierarchy</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">value</span> <span class="ow">is</span> <span class="n">FIELD_VALUE</span><span class="p">:</span>
+                <span class="k">break</span>
+
+            <span class="k">if</span> <span class="n">part</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">value</span><span class="p">:</span>
+                <span class="n">value</span><span class="p">[</span><span class="n">part</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+            <span class="n">value</span> <span class="o">=</span> <span class="n">value</span><span class="p">[</span><span class="n">part</span><span class="p">]</span>
+
+        <span class="k">if</span> <span class="n">value</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">FIELD_VALUE</span><span class="p">:</span>
+            <span class="n">value</span><span class="p">[</span><span class="n">last</span><span class="p">]</span> <span class="o">=</span> <span class="n">FIELD_VALUE</span>
+    <span class="k">return</span> <span class="n">output</span></div>
+
+
+<div class="viewcode-block" id="QueryVariable"><a class="viewcode-back" href="../../ayon_api.graphql.html#ayon_api.graphql.QueryVariable">[docs]</a><span class="k">class</span> <span class="nc">QueryVariable</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Object representing single varible used in GraphQlQuery.</span>
+
+<span class="sd">    Variable definition is in GraphQl query header but it&#39;s value is used</span>
+<span class="sd">    in fields.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        variable_name (str): Name of variable in query.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">variable_name</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_variable_name</span> <span class="o">=</span> <span class="n">variable_name</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_name</span> <span class="o">=</span> <span class="s2">&quot;$</span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">variable_name</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">name</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Name used in field filter.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_name</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">variable_name</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Name of variable in query definition.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_variable_name</span>
+
+    <span class="k">def</span> <span class="fm">__hash__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_name</span><span class="o">.</span><span class="fm">__hash__</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_name</span>
+
+    <span class="k">def</span> <span class="fm">__format__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_name</span><span class="o">.</span><span class="fm">__format__</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="GraphQlQuery"><a class="viewcode-back" href="../../ayon_api.graphql.html#ayon_api.graphql.GraphQlQuery">[docs]</a><span class="k">class</span> <span class="nc">GraphQlQuery</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;GraphQl query which can have fields to query.</span>
+
+<span class="sd">    Single use object which can be used only for one query. Object and children</span>
+<span class="sd">    objects keep track about paging and progress.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        name (str): Name of query.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">offset</span> <span class="o">=</span> <span class="mi">2</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">order</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_name</span> <span class="o">=</span> <span class="n">name</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_variables</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_children</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_has_multiple_edge_fields</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_order</span> <span class="o">=</span> <span class="n">SortOrder</span><span class="o">.</span><span class="n">parse_value</span><span class="p">(</span><span class="n">order</span><span class="p">,</span> <span class="n">SortOrder</span><span class="o">.</span><span class="n">ascending</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">indent</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Indentation for preparation of query string.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            int: Ident spaces.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="mi">0</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">child_indent</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Indentation for preparation of query string used by children.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            int: Ident spaces for children.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">indent</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">need_query</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Still need query from server.</span>
+
+<span class="sd">        Needed for edges which use pagination.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            bool: If still need query from server.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">child</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_children</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">child</span><span class="o">.</span><span class="n">need_query</span><span class="p">:</span>
+                <span class="k">return</span> <span class="kc">True</span>
+        <span class="k">return</span> <span class="kc">False</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">has_multiple_edge_fields</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_has_multiple_edge_fields</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">edge_counter</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="k">for</span> <span class="n">child</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_children</span><span class="p">:</span>
+                <span class="n">edge_counter</span> <span class="o">+=</span> <span class="n">child</span><span class="o">.</span><span class="n">sum_edge_fields</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">edge_counter</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+                    <span class="k">break</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_has_multiple_edge_fields</span> <span class="o">=</span> <span class="n">edge_counter</span> <span class="o">&gt;</span> <span class="mi">1</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_has_multiple_edge_fields</span>
+
+<div class="viewcode-block" id="GraphQlQuery.add_variable"><a class="viewcode-back" href="../../ayon_api.graphql.html#ayon_api.graphql.GraphQlQuery.add_variable">[docs]</a>    <span class="k">def</span> <span class="nf">add_variable</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">value_type</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Add variable to query.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            key (str): Variable name.</span>
+<span class="sd">            value_type (str): Type of expected value in variables. This is</span>
+<span class="sd">                graphql type e.g. &quot;[String!]&quot;, &quot;Int&quot;, &quot;Boolean&quot;, etc.</span>
+<span class="sd">            value (Any): Default value for variable. Can be changed later.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            QueryVariable: Created variable object.</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            KeyError: If variable was already added before.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_variables</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">KeyError</span><span class="p">(</span>
+                <span class="s2">&quot;Variable </span><span class="se">\&quot;</span><span class="si">{}</span><span class="se">\&quot;</span><span class="s2"> was already set with type </span><span class="si">{}</span><span class="s2">.&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                    <span class="n">key</span><span class="p">,</span> <span class="n">value_type</span>
+                <span class="p">)</span>
+            <span class="p">)</span>
+
+        <span class="n">variable</span> <span class="o">=</span> <span class="n">QueryVariable</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_variables</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="n">value_type</span><span class="p">,</span>
+            <span class="s2">&quot;variable&quot;</span><span class="p">:</span> <span class="n">variable</span><span class="p">,</span>
+            <span class="s2">&quot;value&quot;</span><span class="p">:</span> <span class="n">value</span>
+        <span class="p">}</span>
+        <span class="k">return</span> <span class="n">variable</span></div>
+
+<div class="viewcode-block" id="GraphQlQuery.get_variable"><a class="viewcode-back" href="../../ayon_api.graphql.html#ayon_api.graphql.GraphQlQuery.get_variable">[docs]</a>    <span class="k">def</span> <span class="nf">get_variable</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Variable object.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            key (str): Variable name added to headers.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            QueryVariable: Variable object used in query string.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_variables</span><span class="p">[</span><span class="n">key</span><span class="p">][</span><span class="s2">&quot;variable&quot;</span><span class="p">]</span></div>
+
+<div class="viewcode-block" id="GraphQlQuery.get_variable_value"><a class="viewcode-back" href="../../ayon_api.graphql.html#ayon_api.graphql.GraphQlQuery.get_variable_value">[docs]</a>    <span class="k">def</span> <span class="nf">get_variable_value</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Get Current value of variable.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            key (str): Variable name.</span>
+<span class="sd">            default (Any): Default value if variable is available.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Any: Variable value.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">variable_item</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_variables</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">variable_item</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">variable_item</span><span class="p">[</span><span class="s2">&quot;value&quot;</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">default</span></div>
+
+<div class="viewcode-block" id="GraphQlQuery.set_variable_value"><a class="viewcode-back" href="../../ayon_api.graphql.html#ayon_api.graphql.GraphQlQuery.set_variable_value">[docs]</a>    <span class="k">def</span> <span class="nf">set_variable_value</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Set value for variable.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            key (str): Variable name under which the value is stored.</span>
+<span class="sd">            value (Any): Variable value used in query. Variable is not used</span>
+<span class="sd">                if value is &#39;None&#39;.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_variables</span><span class="p">[</span><span class="n">key</span><span class="p">][</span><span class="s2">&quot;value&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span></div>
+
+<div class="viewcode-block" id="GraphQlQuery.get_variable_keys"><a class="viewcode-back" href="../../ayon_api.graphql.html#ayon_api.graphql.GraphQlQuery.get_variable_keys">[docs]</a>    <span class="k">def</span> <span class="nf">get_variable_keys</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Get all variable keys.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            set[str]: Variable keys.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="nb">set</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_variables</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span></div>
+
+<div class="viewcode-block" id="GraphQlQuery.get_variables_values"><a class="viewcode-back" href="../../ayon_api.graphql.html#ayon_api.graphql.GraphQlQuery.get_variables_values">[docs]</a>    <span class="k">def</span> <span class="nf">get_variables_values</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Calculate variable values used that should be used in query.</span>
+
+<span class="sd">        Variables with value set to &#39;None&#39; are skipped.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Dict[str, Any]: Variable values by their name.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">output</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">item</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_variables</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="n">value</span> <span class="o">=</span> <span class="n">item</span><span class="p">[</span><span class="s2">&quot;value&quot;</span><span class="p">]</span>
+            <span class="k">if</span> <span class="n">value</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">output</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">item</span><span class="p">[</span><span class="s2">&quot;value&quot;</span><span class="p">]</span>
+
+        <span class="k">return</span> <span class="n">output</span></div>
+
+<div class="viewcode-block" id="GraphQlQuery.add_obj_field"><a class="viewcode-back" href="../../ayon_api.graphql.html#ayon_api.graphql.GraphQlQuery.add_obj_field">[docs]</a>    <span class="k">def</span> <span class="nf">add_obj_field</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">field</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Add field object to children.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            field (BaseGraphQlQueryField): Add field to query children.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">field</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_children</span><span class="p">:</span>
+            <span class="k">return</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_children</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">field</span><span class="p">)</span>
+        <span class="n">field</span><span class="o">.</span><span class="n">set_parent</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="GraphQlQuery.add_field_with_edges"><a class="viewcode-back" href="../../ayon_api.graphql.html#ayon_api.graphql.GraphQlQuery.add_field_with_edges">[docs]</a>    <span class="k">def</span> <span class="nf">add_field_with_edges</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Add field with edges to query.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            name (str): Field name e.g. &#39;tasks&#39;.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            GraphQlQueryEdgeField: Created field object.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">item</span> <span class="o">=</span> <span class="n">GraphQlQueryEdgeField</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="bp">self</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_order</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">add_obj_field</span><span class="p">(</span><span class="n">item</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">item</span></div>
+
+<div class="viewcode-block" id="GraphQlQuery.add_field"><a class="viewcode-back" href="../../ayon_api.graphql.html#ayon_api.graphql.GraphQlQuery.add_field">[docs]</a>    <span class="k">def</span> <span class="nf">add_field</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Add field to query.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            name (str): Field name e.g. &#39;id&#39;.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            GraphQlQueryField: Created field object.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">item</span> <span class="o">=</span> <span class="n">GraphQlQueryField</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="bp">self</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_order</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">add_obj_field</span><span class="p">(</span><span class="n">item</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">item</span></div>
+
+<div class="viewcode-block" id="GraphQlQuery.get_field_by_keys"><a class="viewcode-back" href="../../ayon_api.graphql.html#ayon_api.graphql.GraphQlQuery.get_field_by_keys">[docs]</a>    <span class="k">def</span> <span class="nf">get_field_by_keys</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">keys</span><span class="p">:</span> <span class="n">Iterable</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="s2">&quot;BaseGraphQlQueryField&quot;</span><span class="p">]:</span>
+        <span class="n">keys</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">keys</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">keys</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">None</span>
+
+        <span class="n">key</span> <span class="o">=</span> <span class="n">keys</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">child</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_children</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">child</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="n">key</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">child</span><span class="o">.</span><span class="n">get_field_by_keys</span><span class="p">(</span><span class="n">keys</span><span class="p">)</span>
+        <span class="k">return</span> <span class="kc">None</span></div>
+
+<div class="viewcode-block" id="GraphQlQuery.get_field_by_path"><a class="viewcode-back" href="../../ayon_api.graphql.html#ayon_api.graphql.GraphQlQuery.get_field_by_path">[docs]</a>    <span class="k">def</span> <span class="nf">get_field_by_path</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="s2">&quot;BaseGraphQlQueryField&quot;</span><span class="p">]:</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_field_by_keys</span><span class="p">(</span><span class="n">path</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;/&quot;</span><span class="p">))</span></div>
+
+<div class="viewcode-block" id="GraphQlQuery.calculate_query"><a class="viewcode-back" href="../../ayon_api.graphql.html#ayon_api.graphql.GraphQlQuery.calculate_query">[docs]</a>    <span class="k">def</span> <span class="nf">calculate_query</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Calculate query string which is sent to server.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            str: GraphQl string with variables and headers.</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            ValueError: Query has no fiels.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_children</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Missing fields to query&quot;</span><span class="p">)</span>
+
+        <span class="n">variables</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_variables</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
+            <span class="k">if</span> <span class="n">item</span><span class="p">[</span><span class="s2">&quot;value&quot;</span><span class="p">]</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">continue</span>
+
+            <span class="n">variables</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                <span class="s2">&quot;</span><span class="si">{}</span><span class="s2">: </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">item</span><span class="p">[</span><span class="s2">&quot;variable&quot;</span><span class="p">],</span> <span class="n">item</span><span class="p">[</span><span class="s2">&quot;type&quot;</span><span class="p">])</span>
+            <span class="p">)</span>
+
+        <span class="n">variables_str</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">variables</span><span class="p">:</span>
+            <span class="n">variables_str</span> <span class="o">=</span> <span class="s2">&quot;(</span><span class="si">{}</span><span class="s2">)&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s2">&quot;,&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">variables</span><span class="p">))</span>
+        <span class="n">header</span> <span class="o">=</span> <span class="s2">&quot;query </span><span class="si">{}{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_name</span><span class="p">,</span> <span class="n">variables_str</span><span class="p">)</span>
+
+        <span class="n">output</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">output</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">header</span> <span class="o">+</span> <span class="s2">&quot; {&quot;</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">field</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_children</span><span class="p">:</span>
+            <span class="n">output</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">field</span><span class="o">.</span><span class="n">calculate_query</span><span class="p">())</span>
+        <span class="n">output</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;}&quot;</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">output</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="GraphQlQuery.parse_result"><a class="viewcode-back" href="../../ayon_api.graphql.html#ayon_api.graphql.GraphQlQuery.parse_result">[docs]</a>    <span class="k">def</span> <span class="nf">parse_result</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">output</span><span class="p">,</span> <span class="n">progress_data</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Parse data from response for output.</span>
+
+<span class="sd">        Output is stored to passed &#39;output&#39; variable. That&#39;s because of paging</span>
+<span class="sd">        during which objects must have access to both new and previous values.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            data (Dict[str, Any]): Data received using calculated query.</span>
+<span class="sd">            output (Dict[str, Any]): Where parsed data are stored.</span>
+<span class="sd">            progress_data (Dict[str, Any]): Data used for paging.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">data</span><span class="p">:</span>
+            <span class="k">return</span>
+
+        <span class="k">for</span> <span class="n">child</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_children</span><span class="p">:</span>
+            <span class="n">child</span><span class="o">.</span><span class="n">parse_result</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">output</span><span class="p">,</span> <span class="n">progress_data</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="GraphQlQuery.query"><a class="viewcode-back" href="../../ayon_api.graphql.html#ayon_api.graphql.GraphQlQuery.query">[docs]</a>    <span class="k">def</span> <span class="nf">query</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">con</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Do a query from server.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            con (ServerAPI): Connection to server with &#39;query&#39; method.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Dict[str, Any]: Parsed output from GraphQl query.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">progress_data</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="n">output</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">while</span> <span class="bp">self</span><span class="o">.</span><span class="n">need_query</span><span class="p">:</span>
+            <span class="n">query_str</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">calculate_query</span><span class="p">()</span>
+            <span class="n">variables</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_variables_values</span><span class="p">()</span>
+            <span class="n">response</span> <span class="o">=</span> <span class="n">con</span><span class="o">.</span><span class="n">query_graphql</span><span class="p">(</span>
+                <span class="n">query_str</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">get_variables_values</span><span class="p">()</span>
+            <span class="p">)</span>
+            <span class="k">if</span> <span class="n">response</span><span class="o">.</span><span class="n">errors</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="n">GraphQlQueryFailed</span><span class="p">(</span><span class="n">response</span><span class="o">.</span><span class="n">errors</span><span class="p">,</span> <span class="n">query_str</span><span class="p">,</span> <span class="n">variables</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">parse_result</span><span class="p">(</span><span class="n">response</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;data&quot;</span><span class="p">],</span> <span class="n">output</span><span class="p">,</span> <span class="n">progress_data</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">output</span></div>
+
+<div class="viewcode-block" id="GraphQlQuery.continuous_query"><a class="viewcode-back" href="../../ayon_api.graphql.html#ayon_api.graphql.GraphQlQuery.continuous_query">[docs]</a>    <span class="k">def</span> <span class="nf">continuous_query</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">con</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Do a query from server.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            con (ServerAPI): Connection to server with &#39;query&#39; method.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Dict[str, Any]: Parsed output from GraphQl query.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">progress_data</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">has_multiple_edge_fields</span><span class="p">:</span>
+            <span class="n">output</span> <span class="o">=</span> <span class="p">{}</span>
+            <span class="k">while</span> <span class="bp">self</span><span class="o">.</span><span class="n">need_query</span><span class="p">:</span>
+                <span class="n">query_str</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">calculate_query</span><span class="p">()</span>
+                <span class="n">variables</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_variables_values</span><span class="p">()</span>
+                <span class="n">response</span> <span class="o">=</span> <span class="n">con</span><span class="o">.</span><span class="n">query_graphql</span><span class="p">(</span><span class="n">query_str</span><span class="p">,</span> <span class="n">variables</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">response</span><span class="o">.</span><span class="n">errors</span><span class="p">:</span>
+                    <span class="k">raise</span> <span class="n">GraphQlQueryFailed</span><span class="p">(</span>
+                        <span class="n">response</span><span class="o">.</span><span class="n">errors</span><span class="p">,</span> <span class="n">query_str</span><span class="p">,</span> <span class="n">variables</span>
+                    <span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">parse_result</span><span class="p">(</span><span class="n">response</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;data&quot;</span><span class="p">],</span> <span class="n">output</span><span class="p">,</span> <span class="n">progress_data</span><span class="p">)</span>
+
+            <span class="k">yield</span> <span class="n">output</span>
+
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">while</span> <span class="bp">self</span><span class="o">.</span><span class="n">need_query</span><span class="p">:</span>
+                <span class="n">output</span> <span class="o">=</span> <span class="p">{}</span>
+                <span class="n">query_str</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">calculate_query</span><span class="p">()</span>
+                <span class="n">variables</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_variables_values</span><span class="p">()</span>
+                <span class="n">response</span> <span class="o">=</span> <span class="n">con</span><span class="o">.</span><span class="n">query_graphql</span><span class="p">(</span><span class="n">query_str</span><span class="p">,</span> <span class="n">variables</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">response</span><span class="o">.</span><span class="n">errors</span><span class="p">:</span>
+                    <span class="k">raise</span> <span class="n">GraphQlQueryFailed</span><span class="p">(</span>
+                        <span class="n">response</span><span class="o">.</span><span class="n">errors</span><span class="p">,</span> <span class="n">query_str</span><span class="p">,</span> <span class="n">variables</span>
+                    <span class="p">)</span>
+
+                <span class="bp">self</span><span class="o">.</span><span class="n">parse_result</span><span class="p">(</span><span class="n">response</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;data&quot;</span><span class="p">],</span> <span class="n">output</span><span class="p">,</span> <span class="n">progress_data</span><span class="p">)</span>
+
+                <span class="k">yield</span> <span class="n">output</span></div></div>
+
+
+<div class="viewcode-block" id="BaseGraphQlQueryField"><a class="viewcode-back" href="../../ayon_api.graphql.html#ayon_api.graphql.BaseGraphQlQueryField">[docs]</a><span class="k">class</span> <span class="nc">BaseGraphQlQueryField</span><span class="p">(</span><span class="n">ABC</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Field in GraphQl query.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        name (str): Name of field.</span>
+<span class="sd">        parent (Union[BaseGraphQlQueryField, GraphQlQuery]): Parent object of a</span>
+<span class="sd">            field.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">parent</span><span class="p">,</span> <span class="n">order</span><span class="p">):</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">parent</span><span class="p">,</span> <span class="n">GraphQlQuery</span><span class="p">):</span>
+            <span class="n">query_item</span> <span class="o">=</span> <span class="n">parent</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">query_item</span> <span class="o">=</span> <span class="n">parent</span><span class="o">.</span><span class="n">query_item</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_name</span> <span class="o">=</span> <span class="n">name</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_parent</span> <span class="o">=</span> <span class="n">parent</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_filters</span> <span class="o">=</span> <span class="p">{}</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_children</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="c1"># Value is changed on first parse of result</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_need_query</span> <span class="o">=</span> <span class="kc">True</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_query_item</span> <span class="o">=</span> <span class="n">query_item</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_path</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_limit</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_order</span> <span class="o">=</span> <span class="n">order</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_fetched_counter</span> <span class="o">=</span> <span class="mi">0</span>
+
+    <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s2">&quot;&lt;</span><span class="si">{}</span><span class="s2"> </span><span class="si">{}</span><span class="s2">&gt;&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">path</span><span class="p">)</span>
+
+<div class="viewcode-block" id="BaseGraphQlQueryField.get_name"><a class="viewcode-back" href="../../ayon_api.graphql.html#ayon_api.graphql.BaseGraphQlQueryField.get_name">[docs]</a>    <span class="k">def</span> <span class="nf">get_name</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_name</span></div>
+
+    <span class="n">name</span> <span class="o">=</span> <span class="nb">property</span><span class="p">(</span><span class="n">get_name</span><span class="p">)</span>
+
+<div class="viewcode-block" id="BaseGraphQlQueryField.get_field_by_keys"><a class="viewcode-back" href="../../ayon_api.graphql.html#ayon_api.graphql.BaseGraphQlQueryField.get_field_by_keys">[docs]</a>    <span class="k">def</span> <span class="nf">get_field_by_keys</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">keys</span><span class="p">:</span> <span class="n">Iterable</span><span class="p">[</span><span class="nb">str</span><span class="p">]):</span>
+        <span class="n">keys</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">keys</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">keys</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span>
+
+        <span class="n">key</span> <span class="o">=</span> <span class="n">keys</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">child</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_children</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">child</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="n">key</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">child</span><span class="o">.</span><span class="n">get_field_by_keys</span><span class="p">(</span><span class="n">keys</span><span class="p">)</span>
+        <span class="k">return</span> <span class="kc">None</span></div>
+
+<div class="viewcode-block" id="BaseGraphQlQueryField.set_limit"><a class="viewcode-back" href="../../ayon_api.graphql.html#ayon_api.graphql.BaseGraphQlQueryField.set_limit">[docs]</a>    <span class="k">def</span> <span class="nf">set_limit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">limit</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_limit</span> <span class="o">=</span> <span class="n">limit</span></div>
+
+<div class="viewcode-block" id="BaseGraphQlQueryField.set_order"><a class="viewcode-back" href="../../ayon_api.graphql.html#ayon_api.graphql.BaseGraphQlQueryField.set_order">[docs]</a>    <span class="k">def</span> <span class="nf">set_order</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">order</span><span class="p">):</span>
+        <span class="n">order</span> <span class="o">=</span> <span class="n">SortOrder</span><span class="o">.</span><span class="n">parse_value</span><span class="p">(</span><span class="n">order</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">order</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;Got invalid value </span><span class="si">{</span><span class="n">order</span><span class="si">}</span><span class="s2">.&quot;</span>
+                <span class="sa">f</span><span class="s2">&quot; Expected </span><span class="si">{</span><span class="n">SortOrder</span><span class="o">.</span><span class="n">ascending</span><span class="si">}</span><span class="s2"> or </span><span class="si">{</span><span class="n">SortOrder</span><span class="o">.</span><span class="n">descending</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_order</span> <span class="o">=</span> <span class="n">order</span></div>
+
+<div class="viewcode-block" id="BaseGraphQlQueryField.set_ascending_order"><a class="viewcode-back" href="../../ayon_api.graphql.html#ayon_api.graphql.BaseGraphQlQueryField.set_ascending_order">[docs]</a>    <span class="k">def</span> <span class="nf">set_ascending_order</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">enabled</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">set_order</span><span class="p">(</span>
+            <span class="n">SortOrder</span><span class="o">.</span><span class="n">ascending</span> <span class="k">if</span> <span class="n">enabled</span> <span class="k">else</span> <span class="n">SortOrder</span><span class="o">.</span><span class="n">descending</span>
+        <span class="p">)</span></div>
+
+<div class="viewcode-block" id="BaseGraphQlQueryField.set_descending_order"><a class="viewcode-back" href="../../ayon_api.graphql.html#ayon_api.graphql.BaseGraphQlQueryField.set_descending_order">[docs]</a>    <span class="k">def</span> <span class="nf">set_descending_order</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">enabled</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">set_ascending_order</span><span class="p">(</span><span class="ow">not</span> <span class="n">enabled</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="BaseGraphQlQueryField.add_variable"><a class="viewcode-back" href="../../ayon_api.graphql.html#ayon_api.graphql.BaseGraphQlQueryField.add_variable">[docs]</a>    <span class="k">def</span> <span class="nf">add_variable</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">value_type</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Add variable to query.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            key (str): Variable name.</span>
+<span class="sd">            value_type (str): Type of expected value in variables. This is</span>
+<span class="sd">                graphql type e.g. &quot;[String!]&quot;, &quot;Int&quot;, &quot;Boolean&quot;, etc.</span>
+<span class="sd">            value (Any): Default value for variable. Can be changed later.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            QueryVariable: Created variable object.</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            KeyError: If variable was already added before.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_parent</span><span class="o">.</span><span class="n">add_variable</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">value_type</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="BaseGraphQlQueryField.get_variable"><a class="viewcode-back" href="../../ayon_api.graphql.html#ayon_api.graphql.BaseGraphQlQueryField.get_variable">[docs]</a>    <span class="k">def</span> <span class="nf">get_variable</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Variable object.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            key (str): Variable name added to headers.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            QueryVariable: Variable object used in query string.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_parent</span><span class="o">.</span><span class="n">get_variable</span><span class="p">(</span><span class="n">key</span><span class="p">)</span></div>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">need_query</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Still need query from server.</span>
+
+<span class="sd">        Needed for edges which use pagination. Look into children values too.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            bool: If still need query from server.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_need_query</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">True</span>
+
+        <span class="k">for</span> <span class="n">child</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_children_iter</span><span class="p">():</span>
+            <span class="k">if</span> <span class="n">child</span><span class="o">.</span><span class="n">need_query</span><span class="p">:</span>
+                <span class="k">return</span> <span class="kc">True</span>
+        <span class="k">return</span> <span class="kc">False</span>
+
+    <span class="k">def</span> <span class="nf">_children_iter</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Iterate over all children fields of object.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Iterator[BaseGraphQlQueryField]: Children fields.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">child</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_children</span><span class="p">:</span>
+            <span class="k">yield</span> <span class="n">child</span>
+
+<div class="viewcode-block" id="BaseGraphQlQueryField.sum_edge_fields"><a class="viewcode-back" href="../../ayon_api.graphql.html#ayon_api.graphql.BaseGraphQlQueryField.sum_edge_fields">[docs]</a>    <span class="k">def</span> <span class="nf">sum_edge_fields</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">max_limit</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Check how many edge fields query has.</span>
+
+<span class="sd">        In case there are multiple edge fields or are nested the query can&#39;t</span>
+<span class="sd">        yield mid cursor results.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            max_limit (int): Skip rest of counting if counter is bigger then</span>
+<span class="sd">                entered number.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            int: Counter edge fields</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">counter</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">GraphQlQueryEdgeField</span><span class="p">):</span>
+            <span class="n">counter</span> <span class="o">=</span> <span class="mi">1</span>
+
+        <span class="k">for</span> <span class="n">child</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_children_iter</span><span class="p">():</span>
+            <span class="n">counter</span> <span class="o">+=</span> <span class="n">child</span><span class="o">.</span><span class="n">sum_edge_fields</span><span class="p">(</span><span class="n">max_limit</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">max_limit</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">counter</span> <span class="o">&gt;=</span> <span class="n">max_limit</span><span class="p">:</span>
+                <span class="k">break</span>
+        <span class="k">return</span> <span class="n">counter</span></div>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">offset</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_query_item</span><span class="o">.</span><span class="n">offset</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">indent</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_parent</span><span class="o">.</span><span class="n">child_indent</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">offset</span>
+
+    <span class="nd">@property</span>
+    <span class="nd">@abstractmethod</span>
+    <span class="k">def</span> <span class="nf">child_indent</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">pass</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">query_item</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_query_item</span>
+
+    <span class="nd">@property</span>
+    <span class="nd">@abstractmethod</span>
+    <span class="k">def</span> <span class="nf">has_edges</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">pass</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">child_has_edges</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">child</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_children_iter</span><span class="p">():</span>
+            <span class="k">if</span> <span class="n">child</span><span class="o">.</span><span class="n">has_edges</span> <span class="ow">or</span> <span class="n">child</span><span class="o">.</span><span class="n">child_has_edges</span><span class="p">:</span>
+                <span class="k">return</span> <span class="kc">True</span>
+        <span class="k">return</span> <span class="kc">False</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">path</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Field path for debugging purposes.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            str: Field path in query.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_path</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_parent</span><span class="p">,</span> <span class="n">GraphQlQuery</span><span class="p">):</span>
+                <span class="n">path</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_name</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">path</span> <span class="o">=</span> <span class="s2">&quot;/&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">_parent</span><span class="o">.</span><span class="n">path</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_name</span><span class="p">))</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_path</span> <span class="o">=</span> <span class="n">path</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_path</span>
+
+<div class="viewcode-block" id="BaseGraphQlQueryField.reset_cursor"><a class="viewcode-back" href="../../ayon_api.graphql.html#ayon_api.graphql.BaseGraphQlQueryField.reset_cursor">[docs]</a>    <span class="k">def</span> <span class="nf">reset_cursor</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">child</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_children_iter</span><span class="p">():</span>
+            <span class="n">child</span><span class="o">.</span><span class="n">reset_cursor</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="BaseGraphQlQueryField.get_variable_value"><a class="viewcode-back" href="../../ayon_api.graphql.html#ayon_api.graphql.BaseGraphQlQueryField.get_variable_value">[docs]</a>    <span class="k">def</span> <span class="nf">get_variable_value</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_query_item</span><span class="o">.</span><span class="n">get_variable_value</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="BaseGraphQlQueryField.set_variable_value"><a class="viewcode-back" href="../../ayon_api.graphql.html#ayon_api.graphql.BaseGraphQlQueryField.set_variable_value">[docs]</a>    <span class="k">def</span> <span class="nf">set_variable_value</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_query_item</span><span class="o">.</span><span class="n">set_variable_value</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="BaseGraphQlQueryField.set_filter"><a class="viewcode-back" href="../../ayon_api.graphql.html#ayon_api.graphql.BaseGraphQlQueryField.set_filter">[docs]</a>    <span class="k">def</span> <span class="nf">set_filter</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_filters</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span></div>
+
+<div class="viewcode-block" id="BaseGraphQlQueryField.has_filter"><a class="viewcode-back" href="../../ayon_api.graphql.html#ayon_api.graphql.BaseGraphQlQueryField.has_filter">[docs]</a>    <span class="k">def</span> <span class="nf">has_filter</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_filters</span></div>
+
+<div class="viewcode-block" id="BaseGraphQlQueryField.remove_filter"><a class="viewcode-back" href="../../ayon_api.graphql.html#ayon_api.graphql.BaseGraphQlQueryField.remove_filter">[docs]</a>    <span class="k">def</span> <span class="nf">remove_filter</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_filters</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="BaseGraphQlQueryField.set_parent"><a class="viewcode-back" href="../../ayon_api.graphql.html#ayon_api.graphql.BaseGraphQlQueryField.set_parent">[docs]</a>    <span class="k">def</span> <span class="nf">set_parent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_parent</span> <span class="ow">is</span> <span class="n">parent</span><span class="p">:</span>
+            <span class="k">return</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_parent</span> <span class="o">=</span> <span class="n">parent</span>
+        <span class="n">parent</span><span class="o">.</span><span class="n">add_obj_field</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="BaseGraphQlQueryField.add_obj_field"><a class="viewcode-back" href="../../ayon_api.graphql.html#ayon_api.graphql.BaseGraphQlQueryField.add_obj_field">[docs]</a>    <span class="k">def</span> <span class="nf">add_obj_field</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">field</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">field</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_children</span><span class="p">:</span>
+            <span class="k">return</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_children</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">field</span><span class="p">)</span>
+        <span class="n">field</span><span class="o">.</span><span class="n">set_parent</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="BaseGraphQlQueryField.add_field_with_edges"><a class="viewcode-back" href="../../ayon_api.graphql.html#ayon_api.graphql.BaseGraphQlQueryField.add_field_with_edges">[docs]</a>    <span class="k">def</span> <span class="nf">add_field_with_edges</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
+        <span class="n">item</span> <span class="o">=</span> <span class="n">GraphQlQueryEdgeField</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="bp">self</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_order</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">add_obj_field</span><span class="p">(</span><span class="n">item</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">item</span></div>
+
+<div class="viewcode-block" id="BaseGraphQlQueryField.add_field"><a class="viewcode-back" href="../../ayon_api.graphql.html#ayon_api.graphql.BaseGraphQlQueryField.add_field">[docs]</a>    <span class="k">def</span> <span class="nf">add_field</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
+        <span class="n">item</span> <span class="o">=</span> <span class="n">GraphQlQueryField</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="bp">self</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_order</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">add_obj_field</span><span class="p">(</span><span class="n">item</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">item</span></div>
+
+    <span class="k">def</span> <span class="nf">_filter_value_to_str</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">QueryVariable</span><span class="p">):</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_variable_value</span><span class="p">(</span><span class="n">value</span><span class="o">.</span><span class="n">variable_name</span><span class="p">)</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">return</span> <span class="kc">None</span>
+            <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">numbers</span><span class="o">.</span><span class="n">Number</span><span class="p">):</span>
+            <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+            <span class="k">return</span> <span class="s1">&#39;&quot;</span><span class="si">{}</span><span class="s1">&quot;&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="p">(</span><span class="nb">list</span><span class="p">,</span> <span class="nb">set</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">)):</span>
+            <span class="k">return</span> <span class="s2">&quot;[</span><span class="si">{}</span><span class="s2">]&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                <span class="s2">&quot;, &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_filter_value_to_str</span><span class="p">(</span><span class="n">item</span><span class="p">)</span>
+                    <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="nb">iter</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+                <span class="p">)</span>
+            <span class="p">)</span>
+        <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span>
+            <span class="s2">&quot;Unknown type to convert &#39;</span><span class="si">{}</span><span class="s2">&#39;&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">value</span><span class="p">)))</span>
+        <span class="p">)</span>
+
+<div class="viewcode-block" id="BaseGraphQlQueryField.get_filters"><a class="viewcode-back" href="../../ayon_api.graphql.html#ayon_api.graphql.BaseGraphQlQueryField.get_filters">[docs]</a>    <span class="k">def</span> <span class="nf">get_filters</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Receive filters for item.</span>
+
+<span class="sd">        By default just use copy of set filters.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Dict[str, Any]: Fields filters.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_filters</span><span class="p">)</span></div>
+
+    <span class="k">def</span> <span class="nf">_filters_to_string</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">filters</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_filters</span><span class="p">()</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">filters</span><span class="p">:</span>
+            <span class="k">return</span> <span class="s2">&quot;&quot;</span>
+
+        <span class="n">filter_items</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">filters</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="n">string_value</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_filter_value_to_str</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">string_value</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">continue</span>
+
+            <span class="n">filter_items</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">{}</span><span class="s2">: </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">string_value</span><span class="p">))</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">filter_items</span><span class="p">:</span>
+            <span class="k">return</span> <span class="s2">&quot;&quot;</span>
+        <span class="k">return</span> <span class="s2">&quot;(</span><span class="si">{}</span><span class="s2">)&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s2">&quot;, &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">filter_items</span><span class="p">))</span>
+
+    <span class="k">def</span> <span class="nf">_fake_children_parse</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Mark children as they don&#39;t need query.&quot;&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">child</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_children_iter</span><span class="p">():</span>
+            <span class="n">child</span><span class="o">.</span><span class="n">parse_result</span><span class="p">({},</span> <span class="p">{},</span> <span class="p">{})</span>
+
+<div class="viewcode-block" id="BaseGraphQlQueryField.calculate_query"><a class="viewcode-back" href="../../ayon_api.graphql.html#ayon_api.graphql.BaseGraphQlQueryField.calculate_query">[docs]</a>    <span class="nd">@abstractmethod</span>
+    <span class="k">def</span> <span class="nf">calculate_query</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">pass</span></div>
+
+<div class="viewcode-block" id="BaseGraphQlQueryField.parse_result"><a class="viewcode-back" href="../../ayon_api.graphql.html#ayon_api.graphql.BaseGraphQlQueryField.parse_result">[docs]</a>    <span class="nd">@abstractmethod</span>
+    <span class="k">def</span> <span class="nf">parse_result</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">output</span><span class="p">,</span> <span class="n">progress_data</span><span class="p">):</span>
+        <span class="k">pass</span></div></div>
+
+
+<div class="viewcode-block" id="GraphQlQueryField"><a class="viewcode-back" href="../../ayon_api.graphql.html#ayon_api.graphql.GraphQlQueryField">[docs]</a><span class="k">class</span> <span class="nc">GraphQlQueryField</span><span class="p">(</span><span class="n">BaseGraphQlQueryField</span><span class="p">):</span>
+    <span class="n">has_edges</span> <span class="o">=</span> <span class="kc">False</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">child_indent</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">indent</span>
+
+<div class="viewcode-block" id="GraphQlQueryField.parse_result"><a class="viewcode-back" href="../../ayon_api.graphql.html#ayon_api.graphql.GraphQlQueryField.parse_result">[docs]</a>    <span class="k">def</span> <span class="nf">parse_result</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">output</span><span class="p">,</span> <span class="n">progress_data</span><span class="p">):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">{}</span><span class="s2"> Expected &#39;dict&#39; type got &#39;</span><span class="si">{}</span><span class="s2">&#39;&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_name</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">data</span><span class="p">))</span>
+            <span class="p">))</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_need_query</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="n">value</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_name</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">value</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_fake_children_parse</span><span class="p">()</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_name</span> <span class="ow">in</span> <span class="n">data</span><span class="p">:</span>
+                <span class="n">output</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_name</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="k">return</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_children</span><span class="p">:</span>
+            <span class="n">output</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
+            <span class="k">return</span>
+
+        <span class="n">output_value</span> <span class="o">=</span> <span class="n">output</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_name</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">output_value</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">output_value</span> <span class="o">=</span> <span class="p">{}</span>
+                <span class="n">output</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">output_value</span>
+
+            <span class="k">for</span> <span class="n">child</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_children</span><span class="p">:</span>
+                <span class="n">child</span><span class="o">.</span><span class="n">parse_result</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">output_value</span><span class="p">,</span> <span class="n">progress_data</span><span class="p">)</span>
+            <span class="k">return</span>
+
+        <span class="k">if</span> <span class="n">output_value</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">output_value</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="n">output</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">output_value</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">value</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_fake_children_parse</span><span class="p">()</span>
+            <span class="k">return</span>
+
+        <span class="n">diff</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">value</span><span class="p">)</span> <span class="o">-</span> <span class="nb">len</span><span class="p">(</span><span class="n">output_value</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">diff</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">diff</span><span class="p">):</span>
+                <span class="n">output_value</span><span class="o">.</span><span class="n">append</span><span class="p">({})</span>
+
+        <span class="k">for</span> <span class="n">idx</span><span class="p">,</span> <span class="n">item</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">value</span><span class="p">):</span>
+            <span class="n">item_value</span> <span class="o">=</span> <span class="n">output_value</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span>
+            <span class="k">for</span> <span class="n">child</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_children</span><span class="p">:</span>
+                <span class="n">child</span><span class="o">.</span><span class="n">parse_result</span><span class="p">(</span><span class="n">item</span><span class="p">,</span> <span class="n">item_value</span><span class="p">,</span> <span class="n">progress_data</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="GraphQlQueryField.calculate_query"><a class="viewcode-back" href="../../ayon_api.graphql.html#ayon_api.graphql.GraphQlQueryField.calculate_query">[docs]</a>    <span class="k">def</span> <span class="nf">calculate_query</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">offset</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">indent</span> <span class="o">*</span> <span class="s2">&quot; &quot;</span>
+        <span class="n">header</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="si">{}{}{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+            <span class="n">offset</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_name</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_filters_to_string</span><span class="p">()</span>
+        <span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_children</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">header</span>
+
+        <span class="n">output</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">output</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">header</span> <span class="o">+</span> <span class="s2">&quot; {&quot;</span><span class="p">)</span>
+
+        <span class="n">output</span><span class="o">.</span><span class="n">extend</span><span class="p">([</span>
+            <span class="n">field</span><span class="o">.</span><span class="n">calculate_query</span><span class="p">()</span>
+            <span class="k">for</span> <span class="n">field</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_children</span>
+        <span class="p">])</span>
+        <span class="n">output</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">offset</span> <span class="o">+</span> <span class="s2">&quot;}&quot;</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">output</span><span class="p">)</span></div></div>
+
+
+<div class="viewcode-block" id="GraphQlQueryEdgeField"><a class="viewcode-back" href="../../ayon_api.graphql.html#ayon_api.graphql.GraphQlQueryEdgeField">[docs]</a><span class="k">class</span> <span class="nc">GraphQlQueryEdgeField</span><span class="p">(</span><span class="n">BaseGraphQlQueryField</span><span class="p">):</span>
+    <span class="n">has_edges</span> <span class="o">=</span> <span class="kc">True</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_cursor</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_edge_children</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">child_indent</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">offset</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">offset</span> <span class="o">*</span> <span class="mi">2</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">indent</span> <span class="o">+</span> <span class="n">offset</span>
+
+    <span class="k">def</span> <span class="nf">_children_iter</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">child</span> <span class="ow">in</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">_children_iter</span><span class="p">():</span>
+            <span class="k">yield</span> <span class="n">child</span>
+
+        <span class="k">for</span> <span class="n">child</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_edge_children</span><span class="p">:</span>
+            <span class="k">yield</span> <span class="n">child</span>
+
+<div class="viewcode-block" id="GraphQlQueryEdgeField.add_obj_field"><a class="viewcode-back" href="../../ayon_api.graphql.html#ayon_api.graphql.GraphQlQueryEdgeField.add_obj_field">[docs]</a>    <span class="k">def</span> <span class="nf">add_obj_field</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">field</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">field</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_edge_children</span><span class="p">:</span>
+            <span class="k">return</span>
+
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">add_obj_field</span><span class="p">(</span><span class="n">field</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="GraphQlQueryEdgeField.add_obj_edge_field"><a class="viewcode-back" href="../../ayon_api.graphql.html#ayon_api.graphql.GraphQlQueryEdgeField.add_obj_edge_field">[docs]</a>    <span class="k">def</span> <span class="nf">add_obj_edge_field</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">field</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">field</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_edge_children</span> <span class="ow">or</span> <span class="n">field</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_children</span><span class="p">:</span>
+            <span class="k">return</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_edge_children</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">field</span><span class="p">)</span>
+        <span class="n">field</span><span class="o">.</span><span class="n">set_parent</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="GraphQlQueryEdgeField.add_edge_field"><a class="viewcode-back" href="../../ayon_api.graphql.html#ayon_api.graphql.GraphQlQueryEdgeField.add_edge_field">[docs]</a>    <span class="k">def</span> <span class="nf">add_edge_field</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
+        <span class="n">item</span> <span class="o">=</span> <span class="n">GraphQlQueryField</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="bp">self</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_order</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">add_obj_edge_field</span><span class="p">(</span><span class="n">item</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">item</span></div>
+
+<div class="viewcode-block" id="GraphQlQueryEdgeField.reset_cursor"><a class="viewcode-back" href="../../ayon_api.graphql.html#ayon_api.graphql.GraphQlQueryEdgeField.reset_cursor">[docs]</a>    <span class="k">def</span> <span class="nf">reset_cursor</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="c1"># Reset cursor only for edges</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_cursor</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_need_query</span> <span class="o">=</span> <span class="kc">True</span>
+
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">reset_cursor</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="GraphQlQueryEdgeField.parse_result"><a class="viewcode-back" href="../../ayon_api.graphql.html#ayon_api.graphql.GraphQlQueryEdgeField.parse_result">[docs]</a>    <span class="k">def</span> <span class="nf">parse_result</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">output</span><span class="p">,</span> <span class="n">progress_data</span><span class="p">):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">{}</span><span class="s2"> Expected &#39;dict&#39; type got &#39;</span><span class="si">{}</span><span class="s2">&#39;&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_name</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">data</span><span class="p">))</span>
+            <span class="p">))</span>
+
+        <span class="n">value</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_name</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">value</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_fake_children_parse</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_need_query</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="k">return</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_name</span> <span class="ow">in</span> <span class="n">output</span><span class="p">:</span>
+            <span class="n">node_values</span> <span class="o">=</span> <span class="n">output</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_name</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">node_values</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="n">output</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">node_values</span>
+
+        <span class="n">handle_cursors</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">child_has_edges</span>
+        <span class="k">if</span> <span class="n">handle_cursors</span><span class="p">:</span>
+            <span class="n">cursor_key</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_cursor_key</span><span class="p">()</span>
+            <span class="k">if</span> <span class="n">cursor_key</span> <span class="ow">in</span> <span class="n">progress_data</span><span class="p">:</span>
+                <span class="n">nodes_by_cursor</span> <span class="o">=</span> <span class="n">progress_data</span><span class="p">[</span><span class="n">cursor_key</span><span class="p">]</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">nodes_by_cursor</span> <span class="o">=</span> <span class="p">{}</span>
+                <span class="n">progress_data</span><span class="p">[</span><span class="n">cursor_key</span><span class="p">]</span> <span class="o">=</span> <span class="n">nodes_by_cursor</span>
+
+        <span class="n">page_info</span> <span class="o">=</span> <span class="n">value</span><span class="p">[</span><span class="s2">&quot;pageInfo&quot;</span><span class="p">]</span>
+        <span class="n">new_cursor</span> <span class="o">=</span> <span class="n">page_info</span><span class="p">[</span><span class="s2">&quot;endCursor&quot;</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_need_query</span> <span class="o">=</span> <span class="n">page_info</span><span class="p">[</span><span class="s2">&quot;hasNextPage&quot;</span><span class="p">]</span>
+        <span class="n">edges</span> <span class="o">=</span> <span class="n">value</span><span class="p">[</span><span class="s2">&quot;edges&quot;</span><span class="p">]</span>
+        <span class="c1"># Fake result parse</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">edges</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_fake_children_parse</span><span class="p">()</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_fetched_counter</span> <span class="o">+=</span> <span class="nb">len</span><span class="p">(</span><span class="n">edges</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_limit</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">_fetched_counter</span> <span class="o">&gt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_limit</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_need_query</span> <span class="o">=</span> <span class="kc">False</span>
+
+        <span class="k">for</span> <span class="n">edge</span> <span class="ow">in</span> <span class="n">edges</span><span class="p">:</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">handle_cursors</span><span class="p">:</span>
+                <span class="n">edge_value</span> <span class="o">=</span> <span class="p">{}</span>
+                <span class="n">node_values</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">edge_value</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">edge_cursor</span> <span class="o">=</span> <span class="n">edge</span><span class="p">[</span><span class="s2">&quot;cursor&quot;</span><span class="p">]</span>
+                <span class="n">edge_value</span> <span class="o">=</span> <span class="n">nodes_by_cursor</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">edge_cursor</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">edge_value</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                    <span class="n">edge_value</span> <span class="o">=</span> <span class="p">{}</span>
+                    <span class="n">nodes_by_cursor</span><span class="p">[</span><span class="n">edge_cursor</span><span class="p">]</span> <span class="o">=</span> <span class="n">edge_value</span>
+                    <span class="n">node_values</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">edge_value</span><span class="p">)</span>
+
+            <span class="k">for</span> <span class="n">child</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_edge_children</span><span class="p">:</span>
+                <span class="n">child</span><span class="o">.</span><span class="n">parse_result</span><span class="p">(</span><span class="n">edge</span><span class="p">,</span> <span class="n">edge_value</span><span class="p">,</span> <span class="n">progress_data</span><span class="p">)</span>
+
+            <span class="k">for</span> <span class="n">child</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_children</span><span class="p">:</span>
+                <span class="n">child</span><span class="o">.</span><span class="n">parse_result</span><span class="p">(</span><span class="n">edge</span><span class="p">[</span><span class="s2">&quot;node&quot;</span><span class="p">],</span> <span class="n">edge_value</span><span class="p">,</span> <span class="n">progress_data</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_need_query</span><span class="p">:</span>
+            <span class="k">return</span>
+
+        <span class="n">change_cursor</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="k">for</span> <span class="n">child</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_children_iter</span><span class="p">():</span>
+            <span class="k">if</span> <span class="n">child</span><span class="o">.</span><span class="n">need_query</span><span class="p">:</span>
+                <span class="n">change_cursor</span> <span class="o">=</span> <span class="kc">False</span>
+
+        <span class="k">if</span> <span class="n">change_cursor</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">child</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_children_iter</span><span class="p">():</span>
+                <span class="n">child</span><span class="o">.</span><span class="n">reset_cursor</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_cursor</span> <span class="o">=</span> <span class="n">new_cursor</span></div>
+
+    <span class="k">def</span> <span class="nf">_get_cursor_key</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s2">&quot;</span><span class="si">{}</span><span class="s2">/__cursor__&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">path</span><span class="p">)</span>
+
+<div class="viewcode-block" id="GraphQlQueryEdgeField.get_filters"><a class="viewcode-back" href="../../ayon_api.graphql.html#ayon_api.graphql.GraphQlQueryEdgeField.get_filters">[docs]</a>    <span class="k">def</span> <span class="nf">get_filters</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">filters</span> <span class="o">=</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">get_filters</span><span class="p">()</span>
+        <span class="n">limit_key</span> <span class="o">=</span> <span class="s2">&quot;first&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_order</span> <span class="o">==</span> <span class="n">SortOrder</span><span class="o">.</span><span class="n">descending</span><span class="p">:</span>
+            <span class="n">limit_key</span> <span class="o">=</span> <span class="s2">&quot;last&quot;</span>
+
+        <span class="n">limit_amount</span> <span class="o">=</span> <span class="mi">300</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_limit</span><span class="p">:</span>
+            <span class="n">total</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_fetched_counter</span> <span class="o">+</span> <span class="n">limit_amount</span>
+            <span class="k">if</span> <span class="n">total</span> <span class="o">&gt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">_limit</span><span class="p">:</span>
+                <span class="n">limit_amount</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_limit</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">_fetched_counter</span>
+
+        <span class="n">filters</span><span class="p">[</span><span class="n">limit_key</span><span class="p">]</span> <span class="o">=</span> <span class="n">limit_amount</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_cursor</span><span class="p">:</span>
+            <span class="n">filters</span><span class="p">[</span><span class="s2">&quot;after&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_cursor</span>
+        <span class="k">return</span> <span class="n">filters</span></div>
+
+<div class="viewcode-block" id="GraphQlQueryEdgeField.calculate_query"><a class="viewcode-back" href="../../ayon_api.graphql.html#ayon_api.graphql.GraphQlQueryEdgeField.calculate_query">[docs]</a>    <span class="k">def</span> <span class="nf">calculate_query</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_children</span> <span class="ow">and</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_edge_children</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Missing child definitions for edges </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">path</span>
+            <span class="p">))</span>
+
+        <span class="n">offset</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">indent</span> <span class="o">*</span> <span class="s2">&quot; &quot;</span>
+        <span class="n">header</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="si">{}{}{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+            <span class="n">offset</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_name</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_filters_to_string</span><span class="p">()</span>
+        <span class="p">)</span>
+
+        <span class="n">output</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">output</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">header</span> <span class="o">+</span> <span class="s2">&quot; {&quot;</span><span class="p">)</span>
+
+        <span class="n">edges_offset</span> <span class="o">=</span> <span class="n">offset</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">offset</span> <span class="o">*</span> <span class="s2">&quot; &quot;</span>
+        <span class="n">node_offset</span> <span class="o">=</span> <span class="n">edges_offset</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">offset</span> <span class="o">*</span> <span class="s2">&quot; &quot;</span>
+        <span class="n">output</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">edges_offset</span> <span class="o">+</span> <span class="s2">&quot;edges {&quot;</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">field</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_edge_children</span><span class="p">:</span>
+            <span class="n">output</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">field</span><span class="o">.</span><span class="n">calculate_query</span><span class="p">())</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_children</span><span class="p">:</span>
+            <span class="n">output</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">node_offset</span> <span class="o">+</span> <span class="s2">&quot;node {&quot;</span><span class="p">)</span>
+
+            <span class="k">for</span> <span class="n">field</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_children</span><span class="p">:</span>
+                <span class="n">output</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                    <span class="n">field</span><span class="o">.</span><span class="n">calculate_query</span><span class="p">()</span>
+                <span class="p">)</span>
+
+            <span class="n">output</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">node_offset</span> <span class="o">+</span> <span class="s2">&quot;}&quot;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">child_has_edges</span><span class="p">:</span>
+                <span class="n">output</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">node_offset</span> <span class="o">+</span> <span class="s2">&quot;cursor&quot;</span><span class="p">)</span>
+
+        <span class="n">output</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">edges_offset</span> <span class="o">+</span> <span class="s2">&quot;}&quot;</span><span class="p">)</span>
+
+        <span class="c1"># Add page information</span>
+        <span class="n">output</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">edges_offset</span> <span class="o">+</span> <span class="s2">&quot;pageInfo {&quot;</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">page_key</span> <span class="ow">in</span> <span class="p">(</span>
+            <span class="s2">&quot;endCursor&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;hasNextPage&quot;</span><span class="p">,</span>
+        <span class="p">):</span>
+            <span class="n">output</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">node_offset</span> <span class="o">+</span> <span class="n">page_key</span><span class="p">)</span>
+        <span class="n">output</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">edges_offset</span> <span class="o">+</span> <span class="s2">&quot;}&quot;</span><span class="p">)</span>
+        <span class="n">output</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">offset</span> <span class="o">+</span> <span class="s2">&quot;}&quot;</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">output</span><span class="p">)</span></div></div>
+
+
+<span class="n">INTROSPECTION_QUERY</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;</span>
+<span class="s2">  query IntrospectionQuery {</span>
+<span class="s2">    __schema {</span>
+<span class="s2">      queryType { name }</span>
+<span class="s2">      mutationType { name }</span>
+<span class="s2">      subscriptionType { name }</span>
+<span class="s2">      types {</span>
+<span class="s2">        ...FullType</span>
+<span class="s2">      }</span>
+<span class="s2">      directives {</span>
+<span class="s2">        name</span>
+<span class="s2">        description</span>
+<span class="s2">        locations</span>
+<span class="s2">        args {</span>
+<span class="s2">          ...InputValue</span>
+<span class="s2">        }</span>
+<span class="s2">      }</span>
+<span class="s2">    }</span>
+<span class="s2">  }</span>
+<span class="s2">  fragment FullType on __Type {</span>
+<span class="s2">    kind</span>
+<span class="s2">    name</span>
+<span class="s2">    description</span>
+<span class="s2">    fields(includeDeprecated: true) {</span>
+<span class="s2">      name</span>
+<span class="s2">      description</span>
+<span class="s2">      args {</span>
+<span class="s2">        ...InputValue</span>
+<span class="s2">      }</span>
+<span class="s2">      type {</span>
+<span class="s2">        ...TypeRef</span>
+<span class="s2">      }</span>
+<span class="s2">      isDeprecated</span>
+<span class="s2">      deprecationReason</span>
+<span class="s2">    }</span>
+<span class="s2">    inputFields {</span>
+<span class="s2">      ...InputValue</span>
+<span class="s2">    }</span>
+<span class="s2">    interfaces {</span>
+<span class="s2">      ...TypeRef</span>
+<span class="s2">    }</span>
+<span class="s2">    enumValues(includeDeprecated: true) {</span>
+<span class="s2">      name</span>
+<span class="s2">      description</span>
+<span class="s2">      isDeprecated</span>
+<span class="s2">      deprecationReason</span>
+<span class="s2">    }</span>
+<span class="s2">    possibleTypes {</span>
+<span class="s2">      ...TypeRef</span>
+<span class="s2">    }</span>
+<span class="s2">  }</span>
+<span class="s2">  fragment InputValue on __InputValue {</span>
+<span class="s2">    name</span>
+<span class="s2">    description</span>
+<span class="s2">    type { ...TypeRef }</span>
+<span class="s2">    defaultValue</span>
+<span class="s2">  }</span>
+<span class="s2">  fragment TypeRef on __Type {</span>
+<span class="s2">    kind</span>
+<span class="s2">    name</span>
+<span class="s2">    ofType {</span>
+<span class="s2">      kind</span>
+<span class="s2">      name</span>
+<span class="s2">      ofType {</span>
+<span class="s2">        kind</span>
+<span class="s2">        name</span>
+<span class="s2">        ofType {</span>
+<span class="s2">          kind</span>
+<span class="s2">          name</span>
+<span class="s2">          ofType {</span>
+<span class="s2">            kind</span>
+<span class="s2">            name</span>
+<span class="s2">            ofType {</span>
+<span class="s2">              kind</span>
+<span class="s2">              name</span>
+<span class="s2">              ofType {</span>
+<span class="s2">                kind</span>
+<span class="s2">                name</span>
+<span class="s2">                ofType {</span>
+<span class="s2">                  kind</span>
+<span class="s2">                  name</span>
+<span class="s2">                }</span>
+<span class="s2">              }</span>
+<span class="s2">            }</span>
+<span class="s2">          }</span>
+<span class="s2">        }</span>
+<span class="s2">      }</span>
+<span class="s2">    }</span>
+<span class="s2">  }</span>
+<span class="s2">&quot;&quot;&quot;</span>
+</pre></div>
+
+					 </div>
+					 
+					</div>
+					<footer>
+  
+
+  <div role="contentinfo">
+    <p>
+        
+        &copy; Copyright 2024, ynput.io <info@ynput.io>
+	  <br>
+      
+      
+      
+      Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+      
+      <a href="https://github.com/revitron/revitron-sphinx-theme">theme</a>
+      
+      provided by <a href="https://github.com/revitron">Revitron</a>.
+
+    </p>
+  </div> 
+
+</footer>
+
+				</div>
+			</div>
+
+		</section>
+
+	</div>
+	
+
+	<script type="text/javascript">
+			jQuery(function () {
+					SphinxRtdTheme.Navigation.enable(true);
+			});
+	</script>
+
+	
+	
+		
+	 
+
+ 
+</body>	
+</html>

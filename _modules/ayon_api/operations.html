@@ -1,0 +1,1663 @@
+
+	
+
+<!DOCTYPE html>
+<html class="writer-html5 " lang="en" >
+<head>
+	<meta charset="utf-8">
+	
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	
+		<title>ayon_api.operations &mdash; ayon-python-api 1.0.11 documentation</title>
+	
+	
+	
+	<link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+	<link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+	<link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+	<link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+
+	
+	
+		<link rel="shortcut icon" href="../../_static/favicon.ico"/>
+	
+	
+	
+		<link rel="canonical" href="https://github.com/ynput/ayon-python-api_modules/ayon_api/operations.html"/>
+	
+
+	
+	<!--[if lt IE 9]>
+		<script src="../../_static/js/html5shiv.min.js"></script>
+	<![endif]-->
+	
+		
+			<script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+				<script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+				<script src="../../_static/jquery.js"></script>
+				<script src="../../_static/underscore.js"></script>
+				<script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+				<script src="../../_static/doctools.js"></script>
+				<script src="../../_static/sphinx_highlight.js"></script>
+		
+		<script type="text/javascript" src="../../_static/js/theme.js"></script>
+
+		
+		<link rel="index" title="Index" href="../../genindex.html" />
+		<link rel="search" title="Search" href="../../search.html" /> 
+</head>
+<body class="wy-body-for-nav">
+
+
+	 
+	<div class="wy-grid-for-nav">
+		
+		<nav data-toggle="wy-nav-shift" class="wy-nav-side">
+			<div class="wy-side-scroll">
+				<div class="wy-side-nav-search">
+					
+						<div class="brand">
+							<a href="../../index.html">
+							
+								<img src="../../_static/AYON_blackG_dot.svg" class="logo" alt="Logo"/>
+							
+							</a>
+						</div>
+						
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+					
+				</div>
+				
+				<div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+					
+						
+						
+							
+						
+						
+							<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../modules.html">ayon_api</a></li>
+</ul>
+
+						
+					
+				</div>
+				
+			</div>
+		</nav>
+
+		<section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+			
+			<nav class="wy-nav-top" aria-label="top navigation">
+			
+				<i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+				<a href="../../index.html">
+					
+						<img src="../../_static/AYON_blackG_dot.svg" class="logo" alt="Logo"/>
+					
+				</a>
+			
+			</nav>
+
+
+			<div class="wy-nav-content">
+				
+				<div class="rst-content">
+				
+					<div role="navigation" aria-label="breadcrumbs navigation">
+
+	<ul class="wy-breadcrumbs">
+		
+			
+				<li><a href="../../index.html">ayon-python-api</a> ⁄&nbsp;</li>
+				
+					<li><a href="../index.html">Module code</a> ⁄&nbsp;</li>
+				
+				<li><a href="">ayon_api.operations</a></li>
+			
+		
+		
+			<li class="wy-breadcrumbs-aside">
+			
+				<a href="https://github.com/ynput/ayon-python-api" class="fa fa-github-alt"></a>
+			
+			</li>
+		
+	</ul>
+
+</div>
+					<div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+					 <div itemprop="articleBody">
+						
+  <h1>Source code for ayon_api.operations</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">copy</span>
+<span class="kn">import</span> <span class="nn">collections</span>
+<span class="kn">import</span> <span class="nn">uuid</span>
+<span class="kn">from</span> <span class="nn">abc</span> <span class="kn">import</span> <span class="n">ABC</span><span class="p">,</span> <span class="n">abstractmethod</span>
+
+<span class="kn">from</span> <span class="nn">._api</span> <span class="kn">import</span> <span class="n">get_server_api_connection</span>
+<span class="kn">from</span> <span class="nn">.utils</span> <span class="kn">import</span> <span class="n">create_entity_id</span><span class="p">,</span> <span class="n">REMOVED_VALUE</span><span class="p">,</span> <span class="n">NOT_SET</span>
+
+
+<span class="k">def</span> <span class="nf">_create_or_convert_to_id</span><span class="p">(</span><span class="n">entity_id</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">entity_id</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">create_entity_id</span><span class="p">()</span>
+
+    <span class="c1"># Validate if can be converted to uuid</span>
+    <span class="n">uuid</span><span class="o">.</span><span class="n">UUID</span><span class="p">(</span><span class="n">entity_id</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">entity_id</span>
+
+
+<div class="viewcode-block" id="prepare_changes"><a class="viewcode-back" href="../../ayon_api.operations.html#ayon_api.operations.prepare_changes">[docs]</a><span class="k">def</span> <span class="nf">prepare_changes</span><span class="p">(</span><span class="n">old_entity</span><span class="p">,</span> <span class="n">new_entity</span><span class="p">,</span> <span class="n">entity_type</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Prepare changes for entity update.</span>
+
+<span class="sd">    Notes:</span>
+<span class="sd">        Argument &#39;entity_type&#39; is not used, yet. But there might be</span>
+<span class="sd">            differences in future.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        old_entity (dict[str, Any]): Existing entity.</span>
+<span class="sd">        new_entity (dict[str, Any]): New entity.</span>
+<span class="sd">        entity_type (str): Entity type. &quot;project&quot;, &quot;folder&quot;, &quot;product&quot; etc.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        dict[str, Any]: Changes that have new entity.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">changes</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="nb">set</span><span class="p">(</span><span class="n">new_entity</span><span class="o">.</span><span class="n">keys</span><span class="p">()):</span>
+        <span class="k">if</span> <span class="n">key</span> <span class="o">==</span> <span class="s2">&quot;attrib&quot;</span><span class="p">:</span>
+            <span class="k">continue</span>
+
+        <span class="k">if</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">new_entity</span> <span class="ow">and</span> <span class="n">new_entity</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">!=</span> <span class="n">old_entity</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">key</span><span class="p">):</span>
+            <span class="n">changes</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">new_entity</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
+            <span class="k">continue</span>
+
+    <span class="n">attrib_changes</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">if</span> <span class="s2">&quot;attrib&quot;</span> <span class="ow">in</span> <span class="n">new_entity</span><span class="p">:</span>
+        <span class="n">old_attrib</span> <span class="o">=</span> <span class="n">old_entity</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;attrib&quot;</span><span class="p">)</span> <span class="ow">or</span> <span class="p">{}</span>
+        <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">new_entity</span><span class="p">[</span><span class="s2">&quot;attrib&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="k">if</span> <span class="n">value</span> <span class="o">!=</span> <span class="n">old_attrib</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">key</span><span class="p">):</span>
+                <span class="n">attrib_changes</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
+    <span class="k">if</span> <span class="n">attrib_changes</span><span class="p">:</span>
+        <span class="n">changes</span><span class="p">[</span><span class="s2">&quot;attrib&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">attrib_changes</span>
+    <span class="k">return</span> <span class="n">changes</span></div>
+
+
+<div class="viewcode-block" id="new_folder_entity"><a class="viewcode-back" href="../../ayon_api.operations.html#ayon_api.operations.new_folder_entity">[docs]</a><span class="k">def</span> <span class="nf">new_folder_entity</span><span class="p">(</span>
+    <span class="n">name</span><span class="p">,</span>
+    <span class="n">folder_type</span><span class="p">,</span>
+    <span class="n">parent_id</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">status</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">tags</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">attribs</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">data</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">thumbnail_id</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">entity_id</span><span class="o">=</span><span class="kc">None</span>
+<span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Create skeleton data of folder entity.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        name (str): Is considered as unique identifier of folder in project.</span>
+<span class="sd">        folder_type (str): Type of folder.</span>
+<span class="sd">        parent_id (Optional[str]): Parent folder id.</span>
+<span class="sd">        status (Optional[str]): Product status.</span>
+<span class="sd">        tags (Optional[List[str]]): List of tags.</span>
+<span class="sd">        attribs (Optional[Dict[str, Any]]): Explicitly set attributes</span>
+<span class="sd">            of folder.</span>
+<span class="sd">        data (Optional[Dict[str, Any]]): Custom folder data. Empty dictionary</span>
+<span class="sd">            is used if not passed.</span>
+<span class="sd">        thumbnail_id (Optional[str]): Thumbnail id related to folder.</span>
+<span class="sd">        entity_id (Optional[str]): Predefined id of entity. New id is</span>
+<span class="sd">            created if not passed.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        Dict[str, Any]: Skeleton of folder entity.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">attribs</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">attribs</span> <span class="o">=</span> <span class="p">{}</span>
+
+    <span class="k">if</span> <span class="n">data</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="p">{}</span>
+
+    <span class="k">if</span> <span class="n">parent_id</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">parent_id</span> <span class="o">=</span> <span class="n">_create_or_convert_to_id</span><span class="p">(</span><span class="n">parent_id</span><span class="p">)</span>
+
+    <span class="n">output</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s2">&quot;id&quot;</span><span class="p">:</span> <span class="n">_create_or_convert_to_id</span><span class="p">(</span><span class="n">entity_id</span><span class="p">),</span>
+        <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="n">name</span><span class="p">,</span>
+        <span class="c1"># This will be ignored</span>
+        <span class="s2">&quot;folderType&quot;</span><span class="p">:</span> <span class="n">folder_type</span><span class="p">,</span>
+        <span class="s2">&quot;parentId&quot;</span><span class="p">:</span> <span class="n">parent_id</span><span class="p">,</span>
+        <span class="s2">&quot;data&quot;</span><span class="p">:</span> <span class="n">data</span><span class="p">,</span>
+        <span class="s2">&quot;attrib&quot;</span><span class="p">:</span> <span class="n">attribs</span><span class="p">,</span>
+        <span class="s2">&quot;thumbnailId&quot;</span><span class="p">:</span> <span class="n">thumbnail_id</span>
+    <span class="p">}</span>
+    <span class="k">if</span> <span class="n">status</span><span class="p">:</span>
+        <span class="n">output</span><span class="p">[</span><span class="s2">&quot;status&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">status</span>
+    <span class="k">if</span> <span class="n">tags</span><span class="p">:</span>
+        <span class="n">output</span><span class="p">[</span><span class="s2">&quot;tags&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">tags</span>
+    <span class="k">return</span> <span class="n">output</span></div>
+
+
+<div class="viewcode-block" id="new_product_entity"><a class="viewcode-back" href="../../ayon_api.operations.html#ayon_api.operations.new_product_entity">[docs]</a><span class="k">def</span> <span class="nf">new_product_entity</span><span class="p">(</span>
+    <span class="n">name</span><span class="p">,</span>
+    <span class="n">product_type</span><span class="p">,</span>
+    <span class="n">folder_id</span><span class="p">,</span>
+    <span class="n">status</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">tags</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">attribs</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">data</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">entity_id</span><span class="o">=</span><span class="kc">None</span>
+<span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Create skeleton data of product entity.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        name (str): Is considered as unique identifier of</span>
+<span class="sd">            product under folder.</span>
+<span class="sd">        product_type (str): Product type.</span>
+<span class="sd">        folder_id (str): Parent folder id.</span>
+<span class="sd">        status (Optional[str]): Product status.</span>
+<span class="sd">        tags (Optional[List[str]]): List of tags.</span>
+<span class="sd">        attribs (Optional[Dict[str, Any]]): Explicitly set attributes</span>
+<span class="sd">            of product.</span>
+<span class="sd">        data (Optional[Dict[str, Any]]): product entity data. Empty dictionary</span>
+<span class="sd">            is used if not passed.</span>
+<span class="sd">        entity_id (Optional[str]): Predefined id of entity. New id is</span>
+<span class="sd">            created if not passed.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        Dict[str, Any]: Skeleton of product entity.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">attribs</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">attribs</span> <span class="o">=</span> <span class="p">{}</span>
+
+    <span class="k">if</span> <span class="n">data</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="p">{}</span>
+
+    <span class="n">output</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s2">&quot;id&quot;</span><span class="p">:</span> <span class="n">_create_or_convert_to_id</span><span class="p">(</span><span class="n">entity_id</span><span class="p">),</span>
+        <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="n">name</span><span class="p">,</span>
+        <span class="s2">&quot;productType&quot;</span><span class="p">:</span> <span class="n">product_type</span><span class="p">,</span>
+        <span class="s2">&quot;attrib&quot;</span><span class="p">:</span> <span class="n">attribs</span><span class="p">,</span>
+        <span class="s2">&quot;data&quot;</span><span class="p">:</span> <span class="n">data</span><span class="p">,</span>
+        <span class="s2">&quot;folderId&quot;</span><span class="p">:</span> <span class="n">_create_or_convert_to_id</span><span class="p">(</span><span class="n">folder_id</span><span class="p">),</span>
+    <span class="p">}</span>
+    <span class="k">if</span> <span class="n">status</span><span class="p">:</span>
+        <span class="n">output</span><span class="p">[</span><span class="s2">&quot;status&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">status</span>
+    <span class="k">if</span> <span class="n">tags</span><span class="p">:</span>
+        <span class="n">output</span><span class="p">[</span><span class="s2">&quot;tags&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">tags</span>
+    <span class="k">return</span> <span class="n">output</span></div>
+
+
+<div class="viewcode-block" id="new_version_entity"><a class="viewcode-back" href="../../ayon_api.operations.html#ayon_api.operations.new_version_entity">[docs]</a><span class="k">def</span> <span class="nf">new_version_entity</span><span class="p">(</span>
+    <span class="n">version</span><span class="p">,</span>
+    <span class="n">product_id</span><span class="p">,</span>
+    <span class="n">task_id</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">thumbnail_id</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">author</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">status</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">tags</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">attribs</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">data</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">entity_id</span><span class="o">=</span><span class="kc">None</span>
+<span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Create skeleton data of version entity.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        version (int): Is considered as unique identifier of version</span>
+<span class="sd">            under product.</span>
+<span class="sd">        product_id (str): Parent product id.</span>
+<span class="sd">        task_id (Optional[str]): Task id under which product was created.</span>
+<span class="sd">        thumbnail_id (Optional[str]): Thumbnail related to version.</span>
+<span class="sd">        author (Optional[str]): Name of version author.</span>
+<span class="sd">        status (Optional[str]): Version status.</span>
+<span class="sd">        tags (Optional[List[str]]): List of tags.</span>
+<span class="sd">        attribs (Optional[Dict[str, Any]]): Explicitly set attributes</span>
+<span class="sd">            of version.</span>
+<span class="sd">        data (Optional[Dict[str, Any]]): Version entity custom data.</span>
+<span class="sd">        entity_id (Optional[str]): Predefined id of entity. New id is</span>
+<span class="sd">            created if not passed.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        Dict[str, Any]: Skeleton of version entity.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">attribs</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">attribs</span> <span class="o">=</span> <span class="p">{}</span>
+
+    <span class="k">if</span> <span class="n">data</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="p">{}</span>
+
+    <span class="n">output</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s2">&quot;id&quot;</span><span class="p">:</span> <span class="n">_create_or_convert_to_id</span><span class="p">(</span><span class="n">entity_id</span><span class="p">),</span>
+        <span class="s2">&quot;version&quot;</span><span class="p">:</span> <span class="nb">int</span><span class="p">(</span><span class="n">version</span><span class="p">),</span>
+        <span class="s2">&quot;productId&quot;</span><span class="p">:</span> <span class="n">_create_or_convert_to_id</span><span class="p">(</span><span class="n">product_id</span><span class="p">),</span>
+        <span class="s2">&quot;attrib&quot;</span><span class="p">:</span> <span class="n">attribs</span><span class="p">,</span>
+        <span class="s2">&quot;data&quot;</span><span class="p">:</span> <span class="n">data</span>
+    <span class="p">}</span>
+    <span class="k">if</span> <span class="n">task_id</span><span class="p">:</span>
+        <span class="n">output</span><span class="p">[</span><span class="s2">&quot;taskId&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">task_id</span>
+    <span class="k">if</span> <span class="n">thumbnail_id</span><span class="p">:</span>
+        <span class="n">output</span><span class="p">[</span><span class="s2">&quot;thumbnailId&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">thumbnail_id</span>
+    <span class="k">if</span> <span class="n">author</span><span class="p">:</span>
+        <span class="n">output</span><span class="p">[</span><span class="s2">&quot;author&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">author</span>
+    <span class="k">if</span> <span class="n">tags</span><span class="p">:</span>
+        <span class="n">output</span><span class="p">[</span><span class="s2">&quot;tags&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">tags</span>
+    <span class="k">if</span> <span class="n">status</span><span class="p">:</span>
+        <span class="n">output</span><span class="p">[</span><span class="s2">&quot;status&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">status</span>
+    <span class="k">return</span> <span class="n">output</span></div>
+
+
+<div class="viewcode-block" id="new_hero_version_entity"><a class="viewcode-back" href="../../ayon_api.operations.html#ayon_api.operations.new_hero_version_entity">[docs]</a><span class="k">def</span> <span class="nf">new_hero_version_entity</span><span class="p">(</span>
+    <span class="n">version</span><span class="p">,</span>
+    <span class="n">product_id</span><span class="p">,</span>
+    <span class="n">task_id</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">thumbnail_id</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">author</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">status</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">tags</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">attribs</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">data</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">entity_id</span><span class="o">=</span><span class="kc">None</span>
+<span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Create skeleton data of hero version entity.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        version (int): Is considered as unique identifier of version</span>
+<span class="sd">            under product. Should be same as standard version if there is any.</span>
+<span class="sd">        product_id (str): Parent product id.</span>
+<span class="sd">        task_id (Optional[str]): Task id under which product was created.</span>
+<span class="sd">        thumbnail_id (Optional[str]): Thumbnail related to version.</span>
+<span class="sd">        author (Optional[str]): Name of version author.</span>
+<span class="sd">        status (Optional[str]): Version status.</span>
+<span class="sd">        tags (Optional[List[str]]): List of tags.</span>
+<span class="sd">        attribs (Optional[Dict[str, Any]]): Explicitly set attributes</span>
+<span class="sd">            of version.</span>
+<span class="sd">        data (Optional[Dict[str, Any]]): Version entity data.</span>
+<span class="sd">        entity_id (Optional[str]): Predefined id of entity. New id is</span>
+<span class="sd">            created if not passed.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        Dict[str, Any]: Skeleton of version entity.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">return</span> <span class="n">new_version_entity</span><span class="p">(</span>
+        <span class="o">-</span><span class="nb">abs</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">version</span><span class="p">)),</span>
+        <span class="n">product_id</span><span class="p">,</span>
+        <span class="n">task_id</span><span class="p">,</span>
+        <span class="n">thumbnail_id</span><span class="p">,</span>
+        <span class="n">author</span><span class="p">,</span>
+        <span class="n">status</span><span class="p">,</span>
+        <span class="n">tags</span><span class="p">,</span>
+        <span class="n">attribs</span><span class="p">,</span>
+        <span class="n">data</span><span class="p">,</span>
+        <span class="n">entity_id</span>
+    <span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="new_representation_entity"><a class="viewcode-back" href="../../ayon_api.operations.html#ayon_api.operations.new_representation_entity">[docs]</a><span class="k">def</span> <span class="nf">new_representation_entity</span><span class="p">(</span>
+    <span class="n">name</span><span class="p">,</span>
+    <span class="n">version_id</span><span class="p">,</span>
+    <span class="n">files</span><span class="p">,</span>
+    <span class="n">status</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">tags</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">attribs</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">data</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">entity_id</span><span class="o">=</span><span class="kc">None</span>
+<span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Create skeleton data of representation entity.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        name (str): Representation name considered as unique identifier</span>
+<span class="sd">            of representation under version.</span>
+<span class="sd">        version_id (str): Parent version id.</span>
+<span class="sd">        files (list[dict[str, str]]): List of files in representation.</span>
+<span class="sd">        status (Optional[str]): Representation status.</span>
+<span class="sd">        tags (Optional[List[str]]): List of tags.</span>
+<span class="sd">        attribs (Optional[Dict[str, Any]]): Explicitly set attributes</span>
+<span class="sd">            of representation.</span>
+<span class="sd">        data (Optional[Dict[str, Any]]): Representation entity data.</span>
+<span class="sd">        entity_id (Optional[str]): Predefined id of entity. New id is created</span>
+<span class="sd">            if not passed.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        Dict[str, Any]: Skeleton of representation entity.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">attribs</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">attribs</span> <span class="o">=</span> <span class="p">{}</span>
+
+    <span class="k">if</span> <span class="n">data</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="p">{}</span>
+
+    <span class="n">output</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s2">&quot;id&quot;</span><span class="p">:</span> <span class="n">_create_or_convert_to_id</span><span class="p">(</span><span class="n">entity_id</span><span class="p">),</span>
+        <span class="s2">&quot;versionId&quot;</span><span class="p">:</span> <span class="n">_create_or_convert_to_id</span><span class="p">(</span><span class="n">version_id</span><span class="p">),</span>
+        <span class="s2">&quot;files&quot;</span><span class="p">:</span> <span class="n">files</span><span class="p">,</span>
+        <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="n">name</span><span class="p">,</span>
+        <span class="s2">&quot;data&quot;</span><span class="p">:</span> <span class="n">data</span><span class="p">,</span>
+        <span class="s2">&quot;attrib&quot;</span><span class="p">:</span> <span class="n">attribs</span>
+    <span class="p">}</span>
+    <span class="k">if</span> <span class="n">tags</span><span class="p">:</span>
+        <span class="n">output</span><span class="p">[</span><span class="s2">&quot;tags&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">tags</span>
+    <span class="k">if</span> <span class="n">status</span><span class="p">:</span>
+        <span class="n">output</span><span class="p">[</span><span class="s2">&quot;status&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">status</span>
+    <span class="k">return</span> <span class="n">output</span></div>
+
+
+<div class="viewcode-block" id="new_workfile_info"><a class="viewcode-back" href="../../ayon_api.operations.html#ayon_api.operations.new_workfile_info">[docs]</a><span class="k">def</span> <span class="nf">new_workfile_info</span><span class="p">(</span>
+    <span class="n">filepath</span><span class="p">,</span>
+    <span class="n">task_id</span><span class="p">,</span>
+    <span class="n">status</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">tags</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">attribs</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">description</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">data</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">entity_id</span><span class="o">=</span><span class="kc">None</span>
+<span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Create skeleton data of workfile info entity.</span>
+
+<span class="sd">    Workfile entity is at this moment used primarily for artist notes.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        filepath (str): Rootless workfile filepath.</span>
+<span class="sd">        task_id (str): Task under which was workfile created.</span>
+<span class="sd">        status (Optional[str]): Workfile status.</span>
+<span class="sd">        tags (Optional[List[str]]): Workfile tags.</span>
+<span class="sd">        attribs (Options[dic[str, Any]]): Explicitly set attributes.</span>
+<span class="sd">        description (Optional[str]): Workfile description.</span>
+<span class="sd">        data (Optional[Dict[str, Any]]): Additional metadata.</span>
+<span class="sd">        entity_id (Optional[str]): Predefined id of entity. New id is created</span>
+<span class="sd">            if not passed.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        Dict[str, Any]: Skeleton of workfile info entity.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">attribs</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">attribs</span> <span class="o">=</span> <span class="p">{}</span>
+
+    <span class="k">if</span> <span class="s2">&quot;extension&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">attribs</span><span class="p">:</span>
+        <span class="n">attribs</span><span class="p">[</span><span class="s2">&quot;extension&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">splitext</span><span class="p">(</span><span class="n">filepath</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+
+    <span class="k">if</span> <span class="n">description</span><span class="p">:</span>
+        <span class="n">attribs</span><span class="p">[</span><span class="s2">&quot;description&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">description</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">data</span><span class="p">:</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="p">{}</span>
+
+    <span class="n">output</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s2">&quot;id&quot;</span><span class="p">:</span> <span class="n">_create_or_convert_to_id</span><span class="p">(</span><span class="n">entity_id</span><span class="p">),</span>
+        <span class="s2">&quot;taskId&quot;</span><span class="p">:</span> <span class="n">task_id</span><span class="p">,</span>
+        <span class="s2">&quot;path&quot;</span><span class="p">:</span> <span class="n">filepath</span><span class="p">,</span>
+        <span class="s2">&quot;data&quot;</span><span class="p">:</span> <span class="n">data</span><span class="p">,</span>
+        <span class="s2">&quot;attrib&quot;</span><span class="p">:</span> <span class="n">attribs</span>
+    <span class="p">}</span>
+    <span class="k">if</span> <span class="n">status</span><span class="p">:</span>
+        <span class="n">output</span><span class="p">[</span><span class="s2">&quot;status&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">status</span>
+
+    <span class="k">if</span> <span class="n">tags</span><span class="p">:</span>
+        <span class="n">output</span><span class="p">[</span><span class="s2">&quot;tags&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">tags</span>
+    <span class="k">return</span> <span class="n">output</span></div>
+
+
+<div class="viewcode-block" id="AbstractOperation"><a class="viewcode-back" href="../../ayon_api.operations.html#ayon_api.operations.AbstractOperation">[docs]</a><span class="k">class</span> <span class="nc">AbstractOperation</span><span class="p">(</span><span class="n">ABC</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Base operation class.</span>
+
+<span class="sd">    Opration represent a call into database. The call can create, change or</span>
+<span class="sd">    remove data.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        project_name (str): On which project operation will happen.</span>
+<span class="sd">        entity_type (str): Type of entity on which change happens.</span>
+<span class="sd">            e.g. &#39;folder&#39;, &#39;representation&#39; etc.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">project_name</span><span class="p">,</span> <span class="n">entity_type</span><span class="p">,</span> <span class="n">session</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_project_name</span> <span class="o">=</span> <span class="n">project_name</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_entity_type</span> <span class="o">=</span> <span class="n">entity_type</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_session</span> <span class="o">=</span> <span class="n">session</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_id</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">uuid</span><span class="o">.</span><span class="n">uuid4</span><span class="p">())</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">project_name</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_project_name</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">id</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Identifier of operation.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_id</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">entity_type</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_entity_type</span>
+
+    <span class="nd">@property</span>
+    <span class="nd">@abstractmethod</span>
+    <span class="k">def</span> <span class="nf">operation_name</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Stringified type of operation.&quot;&quot;&quot;</span>
+        <span class="k">pass</span>
+
+<div class="viewcode-block" id="AbstractOperation.to_data"><a class="viewcode-back" href="../../ayon_api.operations.html#ayon_api.operations.AbstractOperation.to_data">[docs]</a>    <span class="k">def</span> <span class="nf">to_data</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Convert opration to data that can be converted to json or others.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Dict[str, Any]: Description of operation.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="p">{</span>
+            <span class="s2">&quot;id&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_id</span><span class="p">,</span>
+            <span class="s2">&quot;entity_type&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">entity_type</span><span class="p">,</span>
+            <span class="s2">&quot;project_name&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">project_name</span><span class="p">,</span>
+            <span class="s2">&quot;operation&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">operation_name</span>
+        <span class="p">}</span></div></div>
+
+
+<div class="viewcode-block" id="CreateOperation"><a class="viewcode-back" href="../../ayon_api.operations.html#ayon_api.operations.CreateOperation">[docs]</a><span class="k">class</span> <span class="nc">CreateOperation</span><span class="p">(</span><span class="n">AbstractOperation</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Opeartion to create an entity.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        project_name (str): On which project operation will happen.</span>
+<span class="sd">        entity_type (str): Type of entity on which change happens.</span>
+<span class="sd">            e.g. &#39;folder&#39;, &#39;representation&#39; etc.</span>
+<span class="sd">        data (Dict[str, Any]): Data of entity that will be created.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">operation_name</span> <span class="o">=</span> <span class="s2">&quot;create&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">project_name</span><span class="p">,</span> <span class="n">entity_type</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">session</span><span class="p">):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">data</span><span class="p">:</span>
+            <span class="n">data</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">data</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="nb">dict</span><span class="p">(</span><span class="n">data</span><span class="p">))</span>
+
+        <span class="k">if</span> <span class="s2">&quot;id&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">data</span><span class="p">:</span>
+            <span class="n">data</span><span class="p">[</span><span class="s2">&quot;id&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">create_entity_id</span><span class="p">()</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_data</span> <span class="o">=</span> <span class="n">data</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">CreateOperation</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
+            <span class="n">project_name</span><span class="p">,</span> <span class="n">entity_type</span><span class="p">,</span> <span class="n">session</span>
+        <span class="p">)</span>
+
+    <span class="k">def</span> <span class="fm">__setitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">set_value</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="fm">__getitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
+
+<div class="viewcode-block" id="CreateOperation.set_value"><a class="viewcode-back" href="../../ayon_api.operations.html#ayon_api.operations.CreateOperation.set_value">[docs]</a>    <span class="k">def</span> <span class="nf">set_value</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span></div>
+
+<div class="viewcode-block" id="CreateOperation.get"><a class="viewcode-back" href="../../ayon_api.operations.html#ayon_api.operations.CreateOperation.get">[docs]</a>    <span class="k">def</span> <span class="nf">get</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">con</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">con</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">session</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_session</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">entity_id</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_data</span><span class="p">[</span><span class="s2">&quot;id&quot;</span><span class="p">]</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">data</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_data</span>
+
+<div class="viewcode-block" id="CreateOperation.to_data"><a class="viewcode-back" href="../../ayon_api.operations.html#ayon_api.operations.CreateOperation.to_data">[docs]</a>    <span class="k">def</span> <span class="nf">to_data</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">output</span> <span class="o">=</span> <span class="nb">super</span><span class="p">(</span><span class="n">CreateOperation</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">to_data</span><span class="p">()</span>
+        <span class="n">output</span><span class="p">[</span><span class="s2">&quot;data&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">output</span></div>
+
+<div class="viewcode-block" id="CreateOperation.to_server_operation"><a class="viewcode-back" href="../../ayon_api.operations.html#ayon_api.operations.CreateOperation.to_server_operation">[docs]</a>    <span class="k">def</span> <span class="nf">to_server_operation</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">{</span>
+            <span class="s2">&quot;id&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">id</span><span class="p">,</span>
+            <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;create&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;entityType&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">entity_type</span><span class="p">,</span>
+            <span class="s2">&quot;entityId&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">entity_id</span><span class="p">,</span>
+            <span class="s2">&quot;data&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_data</span>
+        <span class="p">}</span></div></div>
+
+
+<div class="viewcode-block" id="UpdateOperation"><a class="viewcode-back" href="../../ayon_api.operations.html#ayon_api.operations.UpdateOperation">[docs]</a><span class="k">class</span> <span class="nc">UpdateOperation</span><span class="p">(</span><span class="n">AbstractOperation</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Operation to update an entity.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        project_name (str): On which project operation will happen.</span>
+<span class="sd">        entity_type (str): Type of entity on which change happens.</span>
+<span class="sd">            e.g. &#39;folder&#39;, &#39;representation&#39; etc.</span>
+<span class="sd">        entity_id (str): Identifier of an entity.</span>
+<span class="sd">        update_data (Dict[str, Any]): Key -&gt; value changes that will be set in</span>
+<span class="sd">            database. If value is set to &#39;REMOVED_VALUE&#39; the key will be</span>
+<span class="sd">            removed. Only first level of dictionary is checked (on purpose).</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">operation_name</span> <span class="o">=</span> <span class="s2">&quot;update&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">project_name</span><span class="p">,</span> <span class="n">entity_type</span><span class="p">,</span> <span class="n">entity_id</span><span class="p">,</span> <span class="n">update_data</span><span class="p">,</span> <span class="n">session</span>
+    <span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">UpdateOperation</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
+            <span class="n">project_name</span><span class="p">,</span> <span class="n">entity_type</span><span class="p">,</span> <span class="n">session</span>
+        <span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_entity_id</span> <span class="o">=</span> <span class="n">entity_id</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_update_data</span> <span class="o">=</span> <span class="n">update_data</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">entity_id</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_entity_id</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">update_data</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_update_data</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">con</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">con</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">session</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_session</span>
+
+<div class="viewcode-block" id="UpdateOperation.to_data"><a class="viewcode-back" href="../../ayon_api.operations.html#ayon_api.operations.UpdateOperation.to_data">[docs]</a>    <span class="k">def</span> <span class="nf">to_data</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">changes</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_update_data</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="k">if</span> <span class="n">value</span> <span class="ow">is</span> <span class="n">REMOVED_VALUE</span><span class="p">:</span>
+                <span class="n">value</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="n">changes</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
+
+        <span class="n">output</span> <span class="o">=</span> <span class="nb">super</span><span class="p">(</span><span class="n">UpdateOperation</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">to_data</span><span class="p">()</span>
+        <span class="n">output</span><span class="o">.</span><span class="n">update</span><span class="p">({</span>
+            <span class="s2">&quot;entity_id&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">entity_id</span><span class="p">,</span>
+            <span class="s2">&quot;changes&quot;</span><span class="p">:</span> <span class="n">changes</span>
+        <span class="p">})</span>
+        <span class="k">return</span> <span class="n">output</span></div>
+
+<div class="viewcode-block" id="UpdateOperation.to_server_operation"><a class="viewcode-back" href="../../ayon_api.operations.html#ayon_api.operations.UpdateOperation.to_server_operation">[docs]</a>    <span class="k">def</span> <span class="nf">to_server_operation</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_update_data</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">None</span>
+
+        <span class="n">update_data</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_update_data</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="k">if</span> <span class="n">value</span> <span class="ow">is</span> <span class="n">REMOVED_VALUE</span><span class="p">:</span>
+                <span class="n">value</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="n">update_data</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
+
+        <span class="k">return</span> <span class="p">{</span>
+            <span class="s2">&quot;id&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">id</span><span class="p">,</span>
+            <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;update&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;entityType&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">entity_type</span><span class="p">,</span>
+            <span class="s2">&quot;entityId&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">entity_id</span><span class="p">,</span>
+            <span class="s2">&quot;data&quot;</span><span class="p">:</span> <span class="n">update_data</span>
+        <span class="p">}</span></div></div>
+
+
+<div class="viewcode-block" id="DeleteOperation"><a class="viewcode-back" href="../../ayon_api.operations.html#ayon_api.operations.DeleteOperation">[docs]</a><span class="k">class</span> <span class="nc">DeleteOperation</span><span class="p">(</span><span class="n">AbstractOperation</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Opeartion to delete an entity.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        project_name (str): On which project operation will happen.</span>
+<span class="sd">        entity_type (str): Type of entity on which change happens.</span>
+<span class="sd">            e.g. &#39;folder&#39;, &#39;representation&#39; etc.</span>
+<span class="sd">        entity_id (str): Entity id that will be removed.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">operation_name</span> <span class="o">=</span> <span class="s2">&quot;delete&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">project_name</span><span class="p">,</span> <span class="n">entity_type</span><span class="p">,</span> <span class="n">entity_id</span><span class="p">,</span> <span class="n">session</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_entity_id</span> <span class="o">=</span> <span class="n">entity_id</span>
+
+        <span class="nb">super</span><span class="p">(</span><span class="n">DeleteOperation</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
+            <span class="n">project_name</span><span class="p">,</span> <span class="n">entity_type</span><span class="p">,</span> <span class="n">session</span>
+        <span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">entity_id</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_entity_id</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">con</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">con</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">session</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_session</span>
+
+<div class="viewcode-block" id="DeleteOperation.to_data"><a class="viewcode-back" href="../../ayon_api.operations.html#ayon_api.operations.DeleteOperation.to_data">[docs]</a>    <span class="k">def</span> <span class="nf">to_data</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">output</span> <span class="o">=</span> <span class="nb">super</span><span class="p">(</span><span class="n">DeleteOperation</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">to_data</span><span class="p">()</span>
+        <span class="n">output</span><span class="p">[</span><span class="s2">&quot;entity_id&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">entity_id</span>
+        <span class="k">return</span> <span class="n">output</span></div>
+
+<div class="viewcode-block" id="DeleteOperation.to_server_operation"><a class="viewcode-back" href="../../ayon_api.operations.html#ayon_api.operations.DeleteOperation.to_server_operation">[docs]</a>    <span class="k">def</span> <span class="nf">to_server_operation</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">{</span>
+            <span class="s2">&quot;id&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">id</span><span class="p">,</span>
+            <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">operation_name</span><span class="p">,</span>
+            <span class="s2">&quot;entityId&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">entity_id</span><span class="p">,</span>
+            <span class="s2">&quot;entityType&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">entity_type</span><span class="p">,</span>
+        <span class="p">}</span></div></div>
+
+
+<div class="viewcode-block" id="OperationsSession"><a class="viewcode-back" href="../../ayon_api.operations.html#ayon_api.operations.OperationsSession">[docs]</a><span class="k">class</span> <span class="nc">OperationsSession</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Session storing operations that should happen in an order.</span>
+
+<span class="sd">    At this moment does not handle anything special can be sonsidered as</span>
+<span class="sd">    stupid list of operations that will happen after each other. If creation</span>
+<span class="sd">    of same entity is there multiple times it&#39;s handled in any way and entity</span>
+<span class="sd">    values are not validated.</span>
+
+<span class="sd">    All operations must be related to single project.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        con (Optional[ServerAPI]): Connection to server. Global connection</span>
+<span class="sd">            is used if not passed.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">con</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">con</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">con</span> <span class="o">=</span> <span class="n">get_server_api_connection</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_con</span> <span class="o">=</span> <span class="n">con</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_project_cache</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_operations</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_nested_operations</span> <span class="o">=</span> <span class="n">collections</span><span class="o">.</span><span class="n">defaultdict</span><span class="p">(</span><span class="nb">list</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">con</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_con</span>
+
+<div class="viewcode-block" id="OperationsSession.get_project"><a class="viewcode-back" href="../../ayon_api.operations.html#ayon_api.operations.OperationsSession.get_project">[docs]</a>    <span class="k">def</span> <span class="nf">get_project</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">project_name</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">project_name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_project_cache</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_project_cache</span><span class="p">[</span><span class="n">project_name</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">con</span><span class="o">.</span><span class="n">get_project</span><span class="p">(</span>
+                <span class="n">project_name</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_project_cache</span><span class="p">[</span><span class="n">project_name</span><span class="p">])</span></div>
+
+    <span class="k">def</span> <span class="fm">__len__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_operations</span><span class="p">)</span>
+
+<div class="viewcode-block" id="OperationsSession.add"><a class="viewcode-back" href="../../ayon_api.operations.html#ayon_api.operations.OperationsSession.add">[docs]</a>    <span class="k">def</span> <span class="nf">add</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">operation</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Add operation to be processed.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            operation (BaseOperation): Operation that should be processed.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span>
+            <span class="n">operation</span><span class="p">,</span>
+            <span class="p">(</span><span class="n">CreateOperation</span><span class="p">,</span> <span class="n">UpdateOperation</span><span class="p">,</span> <span class="n">DeleteOperation</span><span class="p">)</span>
+        <span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;Expected Operation object got </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                <span class="nb">str</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">operation</span><span class="p">))</span>
+            <span class="p">))</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_operations</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">operation</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="OperationsSession.append"><a class="viewcode-back" href="../../ayon_api.operations.html#ayon_api.operations.OperationsSession.append">[docs]</a>    <span class="k">def</span> <span class="nf">append</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">operation</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Add operation to be processed.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            operation (BaseOperation): Operation that should be processed.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">operation</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="OperationsSession.extend"><a class="viewcode-back" href="../../ayon_api.operations.html#ayon_api.operations.OperationsSession.extend">[docs]</a>    <span class="k">def</span> <span class="nf">extend</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">operations</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Add operations to be processed.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            operations (List[BaseOperation]): Operations that should be</span>
+<span class="sd">                processed.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">operation</span> <span class="ow">in</span> <span class="n">operations</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">operation</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="OperationsSession.remove"><a class="viewcode-back" href="../../ayon_api.operations.html#ayon_api.operations.OperationsSession.remove">[docs]</a>    <span class="k">def</span> <span class="nf">remove</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">operation</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Remove operation.&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_operations</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">operation</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="OperationsSession.clear"><a class="viewcode-back" href="../../ayon_api.operations.html#ayon_api.operations.OperationsSession.clear">[docs]</a>    <span class="k">def</span> <span class="nf">clear</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Clear all registered operations.&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_operations</span> <span class="o">=</span> <span class="p">[]</span></div>
+
+<div class="viewcode-block" id="OperationsSession.to_data"><a class="viewcode-back" href="../../ayon_api.operations.html#ayon_api.operations.OperationsSession.to_data">[docs]</a>    <span class="k">def</span> <span class="nf">to_data</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">[</span>
+            <span class="n">operation</span><span class="o">.</span><span class="n">to_data</span><span class="p">()</span>
+            <span class="k">for</span> <span class="n">operation</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_operations</span>
+        <span class="p">]</span></div>
+
+<div class="viewcode-block" id="OperationsSession.commit"><a class="viewcode-back" href="../../ayon_api.operations.html#ayon_api.operations.OperationsSession.commit">[docs]</a>    <span class="k">def</span> <span class="nf">commit</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Commit session operations.&quot;&quot;&quot;</span>
+        <span class="n">operations</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_operations</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_operations</span><span class="p">,</span> <span class="p">[]</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">operations</span><span class="p">:</span>
+            <span class="k">return</span>
+
+        <span class="n">operations_by_project</span> <span class="o">=</span> <span class="n">collections</span><span class="o">.</span><span class="n">defaultdict</span><span class="p">(</span><span class="nb">list</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">operation</span> <span class="ow">in</span> <span class="n">operations</span><span class="p">:</span>
+            <span class="n">operations_by_project</span><span class="p">[</span><span class="n">operation</span><span class="o">.</span><span class="n">project_name</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">operation</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">project_name</span><span class="p">,</span> <span class="n">operations</span> <span class="ow">in</span> <span class="n">operations_by_project</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="n">operations_body</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">for</span> <span class="n">operation</span> <span class="ow">in</span> <span class="n">operations</span><span class="p">:</span>
+                <span class="n">body</span> <span class="o">=</span> <span class="n">operation</span><span class="o">.</span><span class="n">to_server_operation</span><span class="p">()</span>
+                <span class="k">if</span> <span class="n">body</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                    <span class="n">operations_body</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">body</span><span class="p">)</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">_con</span><span class="o">.</span><span class="n">send_batch_operations</span><span class="p">(</span>
+                <span class="n">project_name</span><span class="p">,</span> <span class="n">operations_body</span><span class="p">,</span> <span class="n">can_fail</span><span class="o">=</span><span class="kc">False</span>
+            <span class="p">)</span></div>
+
+<div class="viewcode-block" id="OperationsSession.create_entity"><a class="viewcode-back" href="../../ayon_api.operations.html#ayon_api.operations.OperationsSession.create_entity">[docs]</a>    <span class="k">def</span> <span class="nf">create_entity</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">project_name</span><span class="p">,</span> <span class="n">entity_type</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">nested_id</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Fast access to &#39;CreateOperation&#39;.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            project_name (str): On which project the creation happens.</span>
+<span class="sd">            entity_type (str): Which entity type will be created.</span>
+<span class="sd">            data (Dicst[str, Any]): Entity data.</span>
+<span class="sd">            nested_id (str): Id of other operation from which is triggered</span>
+<span class="sd">                operation -&gt; Operations can trigger suboperations but they</span>
+<span class="sd">                must be added to operations list after it&#39;s parent is added.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            CreateOperation: Object of create operation.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">operation</span> <span class="o">=</span> <span class="n">CreateOperation</span><span class="p">(</span>
+            <span class="n">project_name</span><span class="p">,</span> <span class="n">entity_type</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="bp">self</span>
+        <span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">nested_id</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_nested_operations</span><span class="p">[</span><span class="n">nested_id</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">operation</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">operation</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">operation</span><span class="o">.</span><span class="n">id</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_nested_operations</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_nested_operations</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">operation</span><span class="o">.</span><span class="n">id</span><span class="p">))</span>
+
+        <span class="k">return</span> <span class="n">operation</span></div>
+
+<div class="viewcode-block" id="OperationsSession.update_entity"><a class="viewcode-back" href="../../ayon_api.operations.html#ayon_api.operations.OperationsSession.update_entity">[docs]</a>    <span class="k">def</span> <span class="nf">update_entity</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">project_name</span><span class="p">,</span> <span class="n">entity_type</span><span class="p">,</span> <span class="n">entity_id</span><span class="p">,</span> <span class="n">update_data</span><span class="p">,</span> <span class="n">nested_id</span><span class="o">=</span><span class="kc">None</span>
+    <span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Fast access to &#39;UpdateOperation&#39;.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            UpdateOperation: Object of update operation.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">operation</span> <span class="o">=</span> <span class="n">UpdateOperation</span><span class="p">(</span>
+            <span class="n">project_name</span><span class="p">,</span> <span class="n">entity_type</span><span class="p">,</span> <span class="n">entity_id</span><span class="p">,</span> <span class="n">update_data</span><span class="p">,</span> <span class="bp">self</span>
+        <span class="p">)</span>
+        <span class="k">if</span> <span class="n">nested_id</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_nested_operations</span><span class="p">[</span><span class="n">nested_id</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">operation</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">operation</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">operation</span><span class="o">.</span><span class="n">id</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_nested_operations</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_nested_operations</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">operation</span><span class="o">.</span><span class="n">id</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">operation</span></div>
+
+<div class="viewcode-block" id="OperationsSession.delete_entity"><a class="viewcode-back" href="../../ayon_api.operations.html#ayon_api.operations.OperationsSession.delete_entity">[docs]</a>    <span class="k">def</span> <span class="nf">delete_entity</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">project_name</span><span class="p">,</span> <span class="n">entity_type</span><span class="p">,</span> <span class="n">entity_id</span><span class="p">,</span> <span class="n">nested_id</span><span class="o">=</span><span class="kc">None</span>
+    <span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Fast access to &#39;DeleteOperation&#39;.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            DeleteOperation: Object of delete operation.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">operation</span> <span class="o">=</span> <span class="n">DeleteOperation</span><span class="p">(</span>
+            <span class="n">project_name</span><span class="p">,</span> <span class="n">entity_type</span><span class="p">,</span> <span class="n">entity_id</span><span class="p">,</span> <span class="bp">self</span>
+        <span class="p">)</span>
+        <span class="k">if</span> <span class="n">nested_id</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_nested_operations</span><span class="p">[</span><span class="n">nested_id</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">operation</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">operation</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">operation</span><span class="o">.</span><span class="n">id</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_nested_operations</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_nested_operations</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">operation</span><span class="o">.</span><span class="n">id</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">operation</span></div>
+
+<div class="viewcode-block" id="OperationsSession.create_folder"><a class="viewcode-back" href="../../ayon_api.operations.html#ayon_api.operations.OperationsSession.create_folder">[docs]</a>    <span class="k">def</span> <span class="nf">create_folder</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">project_name</span><span class="p">,</span>
+        <span class="n">name</span><span class="p">,</span>
+        <span class="n">folder_type</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">parent_id</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">label</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">attrib</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">data</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">tags</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">status</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">active</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">thumbnail_id</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">folder_id</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Create new folder.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            project_name (str): Project name.</span>
+<span class="sd">            name (str): Folder name.</span>
+<span class="sd">            folder_type (Optional[str]): Folder type.</span>
+<span class="sd">            parent_id (Optional[str]): Parent folder id. Parent is project</span>
+<span class="sd">                if is ``None``.</span>
+<span class="sd">            label (Optional[str]): Label of folder.</span>
+<span class="sd">            attrib (Optional[dict[str, Any]]): Folder attributes.</span>
+<span class="sd">            data (Optional[dict[str, Any]]): Folder data.</span>
+<span class="sd">            tags (Optional[Iterable[str]]): Folder tags.</span>
+<span class="sd">            status (Optional[str]): Folder status.</span>
+<span class="sd">            active (Optional[bool]): Folder active state.</span>
+<span class="sd">            thumbnail_id (Optional[str]): Folder thumbnail id.</span>
+<span class="sd">            folder_id (Optional[str]): Folder id. If not passed new id is</span>
+<span class="sd">                generated.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            CreateOperation: Object of create operation.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">folder_id</span><span class="p">:</span>
+            <span class="n">folder_id</span> <span class="o">=</span> <span class="n">create_entity_id</span><span class="p">()</span>
+        <span class="n">create_data</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s2">&quot;id&quot;</span><span class="p">:</span> <span class="n">folder_id</span><span class="p">,</span>
+            <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="n">name</span><span class="p">,</span>
+        <span class="p">}</span>
+        <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="p">(</span>
+            <span class="p">(</span><span class="s2">&quot;folderType&quot;</span><span class="p">,</span> <span class="n">folder_type</span><span class="p">),</span>
+            <span class="p">(</span><span class="s2">&quot;parentId&quot;</span><span class="p">,</span> <span class="n">parent_id</span><span class="p">),</span>
+            <span class="p">(</span><span class="s2">&quot;label&quot;</span><span class="p">,</span> <span class="n">label</span><span class="p">),</span>
+            <span class="p">(</span><span class="s2">&quot;attrib&quot;</span><span class="p">,</span> <span class="n">attrib</span><span class="p">),</span>
+            <span class="p">(</span><span class="s2">&quot;data&quot;</span><span class="p">,</span> <span class="n">data</span><span class="p">),</span>
+            <span class="p">(</span><span class="s2">&quot;tags&quot;</span><span class="p">,</span> <span class="n">tags</span><span class="p">),</span>
+            <span class="p">(</span><span class="s2">&quot;status&quot;</span><span class="p">,</span> <span class="n">status</span><span class="p">),</span>
+            <span class="p">(</span><span class="s2">&quot;active&quot;</span><span class="p">,</span> <span class="n">active</span><span class="p">),</span>
+            <span class="p">(</span><span class="s2">&quot;thumbnailId&quot;</span><span class="p">,</span> <span class="n">thumbnail_id</span><span class="p">),</span>
+        <span class="p">):</span>
+            <span class="k">if</span> <span class="n">value</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">create_data</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">create_entity</span><span class="p">(</span>
+            <span class="n">project_name</span><span class="p">,</span> <span class="s2">&quot;folder&quot;</span><span class="p">,</span> <span class="n">create_data</span>
+        <span class="p">)</span></div>
+
+<div class="viewcode-block" id="OperationsSession.update_folder"><a class="viewcode-back" href="../../ayon_api.operations.html#ayon_api.operations.OperationsSession.update_folder">[docs]</a>    <span class="k">def</span> <span class="nf">update_folder</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">project_name</span><span class="p">,</span>
+        <span class="n">folder_id</span><span class="p">,</span>
+        <span class="n">name</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">folder_type</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">parent_id</span><span class="o">=</span><span class="n">NOT_SET</span><span class="p">,</span>
+        <span class="n">label</span><span class="o">=</span><span class="n">NOT_SET</span><span class="p">,</span>
+        <span class="n">attrib</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">data</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">tags</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">status</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">active</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">thumbnail_id</span><span class="o">=</span><span class="n">NOT_SET</span><span class="p">,</span>
+    <span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Update folder entity on server.</span>
+
+<span class="sd">        Do not pass ``parent_id``, ``label`` amd ``thumbnail_id`` if you don&#39;t</span>
+<span class="sd">            want to change their values. Value ``None`` would unset</span>
+<span class="sd">            their value.</span>
+
+<span class="sd">        Update of ``data`` will override existing value on folder entity.</span>
+
+<span class="sd">        Update of ``attrib`` does change only passed attributes. If you want</span>
+<span class="sd">            to unset value, use ``None``.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            project_name (str): Project name.</span>
+<span class="sd">            folder_id (str): Folder id.</span>
+<span class="sd">            name (Optional[str]): New name.</span>
+<span class="sd">            folder_type (Optional[str]): New folder type.</span>
+<span class="sd">            parent_id (Optional[Union[str, None]]): New parent folder id.</span>
+<span class="sd">            label (Optional[Union[str, None]]): New label.</span>
+<span class="sd">            attrib (Optional[dict[str, Any]]): New attributes.</span>
+<span class="sd">            data (Optional[dict[str, Any]]): New data.</span>
+<span class="sd">            tags (Optional[Iterable[str]]): New tags.</span>
+<span class="sd">            status (Optional[str]): New status.</span>
+<span class="sd">            active (Optional[bool]): New active state.</span>
+<span class="sd">            thumbnail_id (Optional[Union[str, None]]): New thumbnail id.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            UpdateOperation: Object of update operation.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">update_data</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="p">(</span>
+            <span class="p">(</span><span class="s2">&quot;name&quot;</span><span class="p">,</span> <span class="n">name</span><span class="p">),</span>
+            <span class="p">(</span><span class="s2">&quot;folderType&quot;</span><span class="p">,</span> <span class="n">folder_type</span><span class="p">),</span>
+            <span class="p">(</span><span class="s2">&quot;attrib&quot;</span><span class="p">,</span> <span class="n">attrib</span><span class="p">),</span>
+            <span class="p">(</span><span class="s2">&quot;data&quot;</span><span class="p">,</span> <span class="n">data</span><span class="p">),</span>
+            <span class="p">(</span><span class="s2">&quot;tags&quot;</span><span class="p">,</span> <span class="n">tags</span><span class="p">),</span>
+            <span class="p">(</span><span class="s2">&quot;status&quot;</span><span class="p">,</span> <span class="n">status</span><span class="p">),</span>
+            <span class="p">(</span><span class="s2">&quot;active&quot;</span><span class="p">,</span> <span class="n">active</span><span class="p">),</span>
+        <span class="p">):</span>
+            <span class="k">if</span> <span class="n">value</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">update_data</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
+
+        <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="p">(</span>
+            <span class="p">(</span><span class="s2">&quot;label&quot;</span><span class="p">,</span> <span class="n">label</span><span class="p">),</span>
+            <span class="p">(</span><span class="s2">&quot;parentId&quot;</span><span class="p">,</span> <span class="n">parent_id</span><span class="p">),</span>
+            <span class="p">(</span><span class="s2">&quot;thumbnailId&quot;</span><span class="p">,</span> <span class="n">thumbnail_id</span><span class="p">),</span>
+        <span class="p">):</span>
+            <span class="k">if</span> <span class="n">value</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">NOT_SET</span><span class="p">:</span>
+                <span class="n">update_data</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">update_entity</span><span class="p">(</span>
+            <span class="n">project_name</span><span class="p">,</span> <span class="s2">&quot;folder&quot;</span><span class="p">,</span> <span class="n">folder_id</span><span class="p">,</span> <span class="n">update_data</span>
+        <span class="p">)</span></div>
+
+<div class="viewcode-block" id="OperationsSession.delete_folder"><a class="viewcode-back" href="../../ayon_api.operations.html#ayon_api.operations.OperationsSession.delete_folder">[docs]</a>    <span class="k">def</span> <span class="nf">delete_folder</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">project_name</span><span class="p">,</span> <span class="n">folder_id</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Delete folder.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            project_name (str): Project name.</span>
+<span class="sd">            folder_id (str): Folder id to delete.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            DeleteOperation: Object of delete operation.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">delete_entity</span><span class="p">(</span>
+            <span class="n">project_name</span><span class="p">,</span> <span class="s2">&quot;folder&quot;</span><span class="p">,</span> <span class="n">folder_id</span>
+        <span class="p">)</span></div>
+
+<div class="viewcode-block" id="OperationsSession.create_task"><a class="viewcode-back" href="../../ayon_api.operations.html#ayon_api.operations.OperationsSession.create_task">[docs]</a>    <span class="k">def</span> <span class="nf">create_task</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">project_name</span><span class="p">,</span>
+        <span class="n">name</span><span class="p">,</span>
+        <span class="n">task_type</span><span class="p">,</span>
+        <span class="n">folder_id</span><span class="p">,</span>
+        <span class="n">label</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">assignees</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">attrib</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">data</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">tags</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">status</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">active</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">thumbnail_id</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">task_id</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Create new task.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            project_name (str): Project name.</span>
+<span class="sd">            name (str): Folder name.</span>
+<span class="sd">            task_type (str): Task type.</span>
+<span class="sd">            folder_id (str): Parent folder id.</span>
+<span class="sd">            label (Optional[str]): Label of folder.</span>
+<span class="sd">            assignees (Optional[Iterable[str]]): Task assignees.</span>
+<span class="sd">            attrib (Optional[dict[str, Any]]): Task attributes.</span>
+<span class="sd">            data (Optional[dict[str, Any]]): Task data.</span>
+<span class="sd">            tags (Optional[Iterable[str]]): Task tags.</span>
+<span class="sd">            status (Optional[str]): Task status.</span>
+<span class="sd">            active (Optional[bool]): Task active state.</span>
+<span class="sd">            thumbnail_id (Optional[str]): Task thumbnail id.</span>
+<span class="sd">            task_id (Optional[str]): Task id. If not passed new id is</span>
+<span class="sd">                generated.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            CreateOperation: Object of create operation.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">task_id</span><span class="p">:</span>
+            <span class="n">task_id</span> <span class="o">=</span> <span class="n">create_entity_id</span><span class="p">()</span>
+        <span class="n">create_data</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s2">&quot;id&quot;</span><span class="p">:</span> <span class="n">task_id</span><span class="p">,</span>
+            <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="n">name</span><span class="p">,</span>
+            <span class="s2">&quot;taskType&quot;</span><span class="p">:</span> <span class="n">task_type</span><span class="p">,</span>
+            <span class="s2">&quot;folderId&quot;</span><span class="p">:</span> <span class="n">folder_id</span><span class="p">,</span>
+        <span class="p">}</span>
+        <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="p">(</span>
+            <span class="p">(</span><span class="s2">&quot;label&quot;</span><span class="p">,</span> <span class="n">label</span><span class="p">),</span>
+            <span class="p">(</span><span class="s2">&quot;attrib&quot;</span><span class="p">,</span> <span class="n">attrib</span><span class="p">),</span>
+            <span class="p">(</span><span class="s2">&quot;data&quot;</span><span class="p">,</span> <span class="n">data</span><span class="p">),</span>
+            <span class="p">(</span><span class="s2">&quot;tags&quot;</span><span class="p">,</span> <span class="n">tags</span><span class="p">),</span>
+            <span class="p">(</span><span class="s2">&quot;status&quot;</span><span class="p">,</span> <span class="n">status</span><span class="p">),</span>
+            <span class="p">(</span><span class="s2">&quot;assignees&quot;</span><span class="p">,</span> <span class="n">assignees</span><span class="p">),</span>
+            <span class="p">(</span><span class="s2">&quot;active&quot;</span><span class="p">,</span> <span class="n">active</span><span class="p">),</span>
+            <span class="p">(</span><span class="s2">&quot;thumbnailId&quot;</span><span class="p">,</span> <span class="n">thumbnail_id</span><span class="p">),</span>
+        <span class="p">):</span>
+            <span class="k">if</span> <span class="n">value</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">create_data</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">create_entity</span><span class="p">(</span>
+            <span class="n">project_name</span><span class="p">,</span> <span class="s2">&quot;task&quot;</span><span class="p">,</span> <span class="n">create_data</span>
+        <span class="p">)</span></div>
+
+<div class="viewcode-block" id="OperationsSession.update_task"><a class="viewcode-back" href="../../ayon_api.operations.html#ayon_api.operations.OperationsSession.update_task">[docs]</a>    <span class="k">def</span> <span class="nf">update_task</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">project_name</span><span class="p">,</span>
+        <span class="n">task_id</span><span class="p">,</span>
+        <span class="n">name</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">task_type</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">folder_id</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">label</span><span class="o">=</span><span class="n">NOT_SET</span><span class="p">,</span>
+        <span class="n">assignees</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">attrib</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">data</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">tags</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">status</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">active</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">thumbnail_id</span><span class="o">=</span><span class="n">NOT_SET</span><span class="p">,</span>
+    <span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Update task entity on server.</span>
+
+<span class="sd">        Do not pass ``label`` amd ``thumbnail_id`` if you don&#39;t</span>
+<span class="sd">            want to change their values. Value ``None`` would unset</span>
+<span class="sd">            their value.</span>
+
+<span class="sd">        Update of ``data`` will override existing value on folder entity.</span>
+
+<span class="sd">        Update of ``attrib`` does change only passed attributes. If you want</span>
+<span class="sd">            to unset value, use ``None``.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            project_name (str): Project name.</span>
+<span class="sd">            task_id (str): Task id.</span>
+<span class="sd">            name (Optional[str]): New name.</span>
+<span class="sd">            task_type (Optional[str]): New task type.</span>
+<span class="sd">            folder_id (Optional[str]): New folder id.</span>
+<span class="sd">            label (Optional[Union[str, None]]): New label.</span>
+<span class="sd">            assignees (Optional[str]): New assignees.</span>
+<span class="sd">            attrib (Optional[dict[str, Any]]): New attributes.</span>
+<span class="sd">            data (Optional[dict[str, Any]]): New data.</span>
+<span class="sd">            tags (Optional[Iterable[str]]): New tags.</span>
+<span class="sd">            status (Optional[str]): New status.</span>
+<span class="sd">            active (Optional[bool]): New active state.</span>
+<span class="sd">            thumbnail_id (Optional[Union[str, None]]): New thumbnail id.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            UpdateOperation: Object of update operation.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">update_data</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="p">(</span>
+            <span class="p">(</span><span class="s2">&quot;name&quot;</span><span class="p">,</span> <span class="n">name</span><span class="p">),</span>
+            <span class="p">(</span><span class="s2">&quot;taskType&quot;</span><span class="p">,</span> <span class="n">task_type</span><span class="p">),</span>
+            <span class="p">(</span><span class="s2">&quot;folderId&quot;</span><span class="p">,</span> <span class="n">folder_id</span><span class="p">),</span>
+            <span class="p">(</span><span class="s2">&quot;assignees&quot;</span><span class="p">,</span> <span class="n">assignees</span><span class="p">),</span>
+            <span class="p">(</span><span class="s2">&quot;attrib&quot;</span><span class="p">,</span> <span class="n">attrib</span><span class="p">),</span>
+            <span class="p">(</span><span class="s2">&quot;data&quot;</span><span class="p">,</span> <span class="n">data</span><span class="p">),</span>
+            <span class="p">(</span><span class="s2">&quot;tags&quot;</span><span class="p">,</span> <span class="n">tags</span><span class="p">),</span>
+            <span class="p">(</span><span class="s2">&quot;status&quot;</span><span class="p">,</span> <span class="n">status</span><span class="p">),</span>
+            <span class="p">(</span><span class="s2">&quot;active&quot;</span><span class="p">,</span> <span class="n">active</span><span class="p">),</span>
+        <span class="p">):</span>
+            <span class="k">if</span> <span class="n">value</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">update_data</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
+
+        <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="p">(</span>
+            <span class="p">(</span><span class="s2">&quot;label&quot;</span><span class="p">,</span> <span class="n">label</span><span class="p">),</span>
+            <span class="p">(</span><span class="s2">&quot;thumbnailId&quot;</span><span class="p">,</span> <span class="n">thumbnail_id</span><span class="p">),</span>
+        <span class="p">):</span>
+            <span class="k">if</span> <span class="n">value</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">NOT_SET</span><span class="p">:</span>
+                <span class="n">update_data</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">update_entity</span><span class="p">(</span>
+            <span class="n">project_name</span><span class="p">,</span> <span class="s2">&quot;task&quot;</span><span class="p">,</span> <span class="n">task_id</span><span class="p">,</span> <span class="n">update_data</span>
+        <span class="p">)</span></div>
+
+<div class="viewcode-block" id="OperationsSession.delete_task"><a class="viewcode-back" href="../../ayon_api.operations.html#ayon_api.operations.OperationsSession.delete_task">[docs]</a>    <span class="k">def</span> <span class="nf">delete_task</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">project_name</span><span class="p">,</span> <span class="n">task_id</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Delete task.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            project_name (str): Project name.</span>
+<span class="sd">            task_id (str): Task id to delete.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            DeleteOperation: Object of delete operation.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">delete_entity</span><span class="p">(</span><span class="n">project_name</span><span class="p">,</span> <span class="s2">&quot;task&quot;</span><span class="p">,</span> <span class="n">task_id</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="OperationsSession.create_product"><a class="viewcode-back" href="../../ayon_api.operations.html#ayon_api.operations.OperationsSession.create_product">[docs]</a>    <span class="k">def</span> <span class="nf">create_product</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">project_name</span><span class="p">,</span>
+        <span class="n">name</span><span class="p">,</span>
+        <span class="n">product_type</span><span class="p">,</span>
+        <span class="n">folder_id</span><span class="p">,</span>
+        <span class="n">attrib</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">data</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">tags</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">status</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">active</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">product_id</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Create new product.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            project_name (str): Project name.</span>
+<span class="sd">            name (str): Product name.</span>
+<span class="sd">            product_type (str): Product type.</span>
+<span class="sd">            folder_id (str): Parent folder id.</span>
+<span class="sd">            attrib (Optional[dict[str, Any]]): Product attributes.</span>
+<span class="sd">            data (Optional[dict[str, Any]]): Product data.</span>
+<span class="sd">            tags (Optional[Iterable[str]]): Product tags.</span>
+<span class="sd">            status (Optional[str]): Product status.</span>
+<span class="sd">            active (Optional[bool]): Product active state.</span>
+<span class="sd">            product_id (Optional[str]): Product id. If not passed new id is</span>
+<span class="sd">                generated.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            CreateOperation: Object of create operation.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">product_id</span><span class="p">:</span>
+            <span class="n">product_id</span> <span class="o">=</span> <span class="n">create_entity_id</span><span class="p">()</span>
+        <span class="n">create_data</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s2">&quot;id&quot;</span><span class="p">:</span> <span class="n">product_id</span><span class="p">,</span>
+            <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="n">name</span><span class="p">,</span>
+            <span class="s2">&quot;productType&quot;</span><span class="p">:</span> <span class="n">product_type</span><span class="p">,</span>
+            <span class="s2">&quot;folderId&quot;</span><span class="p">:</span> <span class="n">folder_id</span><span class="p">,</span>
+        <span class="p">}</span>
+        <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="p">(</span>
+            <span class="p">(</span><span class="s2">&quot;attrib&quot;</span><span class="p">,</span> <span class="n">attrib</span><span class="p">),</span>
+            <span class="p">(</span><span class="s2">&quot;data&quot;</span><span class="p">,</span> <span class="n">data</span><span class="p">),</span>
+            <span class="p">(</span><span class="s2">&quot;tags&quot;</span><span class="p">,</span> <span class="n">tags</span><span class="p">),</span>
+            <span class="p">(</span><span class="s2">&quot;status&quot;</span><span class="p">,</span> <span class="n">status</span><span class="p">),</span>
+            <span class="p">(</span><span class="s2">&quot;active&quot;</span><span class="p">,</span> <span class="n">active</span><span class="p">),</span>
+        <span class="p">):</span>
+            <span class="k">if</span> <span class="n">value</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">create_data</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">create_entity</span><span class="p">(</span>
+            <span class="n">project_name</span><span class="p">,</span> <span class="s2">&quot;product&quot;</span><span class="p">,</span> <span class="n">create_data</span>
+        <span class="p">)</span></div>
+
+<div class="viewcode-block" id="OperationsSession.update_product"><a class="viewcode-back" href="../../ayon_api.operations.html#ayon_api.operations.OperationsSession.update_product">[docs]</a>    <span class="k">def</span> <span class="nf">update_product</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">project_name</span><span class="p">,</span>
+        <span class="n">product_id</span><span class="p">,</span>
+        <span class="n">name</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">folder_id</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">product_type</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">attrib</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">data</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">tags</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">status</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">active</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Update product entity on server.</span>
+
+<span class="sd">        Update of ``data`` will override existing value on folder entity.</span>
+
+<span class="sd">        Update of ``attrib`` does change only passed attributes. If you want</span>
+<span class="sd">            to unset value, use ``None``.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            project_name (str): Project name.</span>
+<span class="sd">            product_id (str): Product id.</span>
+<span class="sd">            name (Optional[str]): New product name.</span>
+<span class="sd">            folder_id (Optional[str]): New product id.</span>
+<span class="sd">            product_type (Optional[str]): New product type.</span>
+<span class="sd">            attrib (Optional[dict[str, Any]]): New product attributes.</span>
+<span class="sd">            data (Optional[dict[str, Any]]): New product data.</span>
+<span class="sd">            tags (Optional[Iterable[str]]): New product tags.</span>
+<span class="sd">            status (Optional[str]): New product status.</span>
+<span class="sd">            active (Optional[bool]): New product active state.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            UpdateOperation: Object of update operation.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">update_data</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="p">(</span>
+            <span class="p">(</span><span class="s2">&quot;name&quot;</span><span class="p">,</span> <span class="n">name</span><span class="p">),</span>
+            <span class="p">(</span><span class="s2">&quot;productType&quot;</span><span class="p">,</span> <span class="n">product_type</span><span class="p">),</span>
+            <span class="p">(</span><span class="s2">&quot;folderId&quot;</span><span class="p">,</span> <span class="n">folder_id</span><span class="p">),</span>
+            <span class="p">(</span><span class="s2">&quot;attrib&quot;</span><span class="p">,</span> <span class="n">attrib</span><span class="p">),</span>
+            <span class="p">(</span><span class="s2">&quot;data&quot;</span><span class="p">,</span> <span class="n">data</span><span class="p">),</span>
+            <span class="p">(</span><span class="s2">&quot;tags&quot;</span><span class="p">,</span> <span class="n">tags</span><span class="p">),</span>
+            <span class="p">(</span><span class="s2">&quot;status&quot;</span><span class="p">,</span> <span class="n">status</span><span class="p">),</span>
+            <span class="p">(</span><span class="s2">&quot;active&quot;</span><span class="p">,</span> <span class="n">active</span><span class="p">),</span>
+        <span class="p">):</span>
+            <span class="k">if</span> <span class="n">value</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">update_data</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">update_entity</span><span class="p">(</span>
+            <span class="n">project_name</span><span class="p">,</span> <span class="s2">&quot;product&quot;</span><span class="p">,</span> <span class="n">update_data</span>
+        <span class="p">)</span></div>
+
+<div class="viewcode-block" id="OperationsSession.delete_product"><a class="viewcode-back" href="../../ayon_api.operations.html#ayon_api.operations.OperationsSession.delete_product">[docs]</a>    <span class="k">def</span> <span class="nf">delete_product</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">project_name</span><span class="p">,</span> <span class="n">product_id</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Delete product.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            project_name (str): Project name.</span>
+<span class="sd">            product_id (str): Product id to delete.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            DeleteOperation: Object of delete operation.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">delete_entity</span><span class="p">(</span>
+            <span class="n">project_name</span><span class="p">,</span> <span class="s2">&quot;product&quot;</span><span class="p">,</span> <span class="n">product_id</span>
+        <span class="p">)</span></div>
+
+<div class="viewcode-block" id="OperationsSession.create_version"><a class="viewcode-back" href="../../ayon_api.operations.html#ayon_api.operations.OperationsSession.create_version">[docs]</a>    <span class="k">def</span> <span class="nf">create_version</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">project_name</span><span class="p">,</span>
+        <span class="n">version</span><span class="p">,</span>
+        <span class="n">product_id</span><span class="p">,</span>
+        <span class="n">task_id</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">author</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">attrib</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">data</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">tags</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">status</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">active</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">thumbnail_id</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">version_id</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Create new version.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            project_name (str): Project name.</span>
+<span class="sd">            version (int): Version.</span>
+<span class="sd">            product_id (str): Parent product id.</span>
+<span class="sd">            task_id (Optional[str]): Parent task id.</span>
+<span class="sd">            author (Optional[str]): Version author.</span>
+<span class="sd">            attrib (Optional[dict[str, Any]]): Version attributes.</span>
+<span class="sd">            data (Optional[dict[str, Any]]): Version data.</span>
+<span class="sd">            tags (Optional[Iterable[str]]): Version tags.</span>
+<span class="sd">            status (Optional[str]): Version status.</span>
+<span class="sd">            active (Optional[bool]): Version active state.</span>
+<span class="sd">            thumbnail_id (Optional[str]): Version thumbnail id.</span>
+<span class="sd">            version_id (Optional[str]): Version id. If not passed new id is</span>
+<span class="sd">                generated.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            CreateOperation: Object of create operation.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">version_id</span><span class="p">:</span>
+            <span class="n">version_id</span> <span class="o">=</span> <span class="n">create_entity_id</span><span class="p">()</span>
+        <span class="n">create_data</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s2">&quot;id&quot;</span><span class="p">:</span> <span class="n">version_id</span><span class="p">,</span>
+            <span class="s2">&quot;version&quot;</span><span class="p">:</span> <span class="n">version</span><span class="p">,</span>
+            <span class="s2">&quot;productId&quot;</span><span class="p">:</span> <span class="n">product_id</span><span class="p">,</span>
+        <span class="p">}</span>
+        <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="p">(</span>
+            <span class="p">(</span><span class="s2">&quot;taskId&quot;</span><span class="p">,</span> <span class="n">task_id</span><span class="p">),</span>
+            <span class="p">(</span><span class="s2">&quot;author&quot;</span><span class="p">,</span> <span class="n">author</span><span class="p">),</span>
+            <span class="p">(</span><span class="s2">&quot;attrib&quot;</span><span class="p">,</span> <span class="n">attrib</span><span class="p">),</span>
+            <span class="p">(</span><span class="s2">&quot;data&quot;</span><span class="p">,</span> <span class="n">data</span><span class="p">),</span>
+            <span class="p">(</span><span class="s2">&quot;tags&quot;</span><span class="p">,</span> <span class="n">tags</span><span class="p">),</span>
+            <span class="p">(</span><span class="s2">&quot;status&quot;</span><span class="p">,</span> <span class="n">status</span><span class="p">),</span>
+            <span class="p">(</span><span class="s2">&quot;active&quot;</span><span class="p">,</span> <span class="n">active</span><span class="p">),</span>
+            <span class="p">(</span><span class="s2">&quot;thumbnailId&quot;</span><span class="p">,</span> <span class="n">thumbnail_id</span><span class="p">),</span>
+        <span class="p">):</span>
+            <span class="k">if</span> <span class="n">value</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">create_data</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">create_entity</span><span class="p">(</span>
+            <span class="n">project_name</span><span class="p">,</span> <span class="s2">&quot;version&quot;</span><span class="p">,</span> <span class="n">create_data</span>
+        <span class="p">)</span></div>
+
+<div class="viewcode-block" id="OperationsSession.update_version"><a class="viewcode-back" href="../../ayon_api.operations.html#ayon_api.operations.OperationsSession.update_version">[docs]</a>    <span class="k">def</span> <span class="nf">update_version</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">project_name</span><span class="p">,</span>
+        <span class="n">version_id</span><span class="p">,</span>
+        <span class="n">version</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">product_id</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">task_id</span><span class="o">=</span><span class="n">NOT_SET</span><span class="p">,</span>
+        <span class="n">attrib</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">data</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">tags</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">status</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">active</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">thumbnail_id</span><span class="o">=</span><span class="n">NOT_SET</span><span class="p">,</span>
+    <span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Update version entity on server.</span>
+
+<span class="sd">        Do not pass ``task_id`` amd ``thumbnail_id`` if you don&#39;t</span>
+<span class="sd">            want to change their values. Value ``None`` would unset</span>
+<span class="sd">            their value.</span>
+
+<span class="sd">        Update of ``data`` will override existing value on folder entity.</span>
+
+<span class="sd">        Update of ``attrib`` does change only passed attributes. If you want</span>
+<span class="sd">            to unset value, use ``None``.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            project_name (str): Project name.</span>
+<span class="sd">            version_id (str): Version id.</span>
+<span class="sd">            version (Optional[int]): New version.</span>
+<span class="sd">            product_id (Optional[str]): New product id.</span>
+<span class="sd">            task_id (Optional[Union[str, None]]): New task id.</span>
+<span class="sd">            attrib (Optional[dict[str, Any]]): New attributes.</span>
+<span class="sd">            data (Optional[dict[str, Any]]): New data.</span>
+<span class="sd">            tags (Optional[Iterable[str]]): New tags.</span>
+<span class="sd">            status (Optional[str]): New status.</span>
+<span class="sd">            active (Optional[bool]): New active state.</span>
+<span class="sd">            thumbnail_id (Optional[Union[str, None]]): New thumbnail id.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            UpdateOperation: Object of update operation.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">update_data</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="p">(</span>
+            <span class="p">(</span><span class="s2">&quot;version&quot;</span><span class="p">,</span> <span class="n">version</span><span class="p">),</span>
+            <span class="p">(</span><span class="s2">&quot;productId&quot;</span><span class="p">,</span> <span class="n">product_id</span><span class="p">),</span>
+            <span class="p">(</span><span class="s2">&quot;taskId&quot;</span><span class="p">,</span> <span class="n">task_id</span><span class="p">),</span>
+            <span class="p">(</span><span class="s2">&quot;attrib&quot;</span><span class="p">,</span> <span class="n">attrib</span><span class="p">),</span>
+            <span class="p">(</span><span class="s2">&quot;data&quot;</span><span class="p">,</span> <span class="n">data</span><span class="p">),</span>
+            <span class="p">(</span><span class="s2">&quot;tags&quot;</span><span class="p">,</span> <span class="n">tags</span><span class="p">),</span>
+            <span class="p">(</span><span class="s2">&quot;status&quot;</span><span class="p">,</span> <span class="n">status</span><span class="p">),</span>
+            <span class="p">(</span><span class="s2">&quot;active&quot;</span><span class="p">,</span> <span class="n">active</span><span class="p">),</span>
+        <span class="p">):</span>
+            <span class="k">if</span> <span class="n">value</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">update_data</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
+
+        <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="p">(</span>
+            <span class="p">(</span><span class="s2">&quot;taskId&quot;</span><span class="p">,</span> <span class="n">task_id</span><span class="p">),</span>
+            <span class="p">(</span><span class="s2">&quot;thumbnailId&quot;</span><span class="p">,</span> <span class="n">thumbnail_id</span><span class="p">),</span>
+        <span class="p">):</span>
+            <span class="k">if</span> <span class="n">value</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">NOT_SET</span><span class="p">:</span>
+                <span class="n">update_data</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">update_entity</span><span class="p">(</span>
+            <span class="n">project_name</span><span class="p">,</span> <span class="s2">&quot;version&quot;</span><span class="p">,</span> <span class="n">version_id</span><span class="p">,</span> <span class="n">update_data</span>
+        <span class="p">)</span></div>
+
+<div class="viewcode-block" id="OperationsSession.delete_version"><a class="viewcode-back" href="../../ayon_api.operations.html#ayon_api.operations.OperationsSession.delete_version">[docs]</a>    <span class="k">def</span> <span class="nf">delete_version</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">project_name</span><span class="p">,</span> <span class="n">version_id</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Delete version.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            project_name (str): Project name.</span>
+<span class="sd">            version_id (str): Version id to delete.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            DeleteOperation: Object of delete operation.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">delete_entity</span><span class="p">(</span>
+            <span class="n">project_name</span><span class="p">,</span> <span class="s2">&quot;version&quot;</span><span class="p">,</span> <span class="n">version_id</span>
+        <span class="p">)</span></div>
+
+<div class="viewcode-block" id="OperationsSession.create_representation"><a class="viewcode-back" href="../../ayon_api.operations.html#ayon_api.operations.OperationsSession.create_representation">[docs]</a>    <span class="k">def</span> <span class="nf">create_representation</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">project_name</span><span class="p">,</span>
+        <span class="n">name</span><span class="p">,</span>
+        <span class="n">version_id</span><span class="p">,</span>
+        <span class="n">files</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">attrib</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">data</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">tags</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">status</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">active</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">representation_id</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Create new representation.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            project_name (str): Project name.</span>
+<span class="sd">            name (str): Representation name.</span>
+<span class="sd">            version_id (str): Parent version id.</span>
+<span class="sd">            files (Optional[list[dict]]): Representation files information.</span>
+<span class="sd">            attrib (Optional[dict[str, Any]]): Representation attributes.</span>
+<span class="sd">            data (Optional[dict[str, Any]]): Representation data.</span>
+<span class="sd">            tags (Optional[Iterable[str]]): Representation tags.</span>
+<span class="sd">            status (Optional[str]): Representation status.</span>
+<span class="sd">            active (Optional[bool]): Representation active state.</span>
+<span class="sd">            representation_id (Optional[str]): Representation id. If not</span>
+<span class="sd">                passed new id is generated.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            CreateOperation: Object of create operation.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">representation_id</span><span class="p">:</span>
+            <span class="n">representation_id</span> <span class="o">=</span> <span class="n">create_entity_id</span><span class="p">()</span>
+        <span class="n">create_data</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s2">&quot;id&quot;</span><span class="p">:</span> <span class="n">representation_id</span><span class="p">,</span>
+            <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="n">name</span><span class="p">,</span>
+            <span class="s2">&quot;versionId&quot;</span><span class="p">:</span> <span class="n">version_id</span><span class="p">,</span>
+        <span class="p">}</span>
+        <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="p">(</span>
+            <span class="p">(</span><span class="s2">&quot;files&quot;</span><span class="p">,</span> <span class="n">files</span><span class="p">),</span>
+            <span class="p">(</span><span class="s2">&quot;attrib&quot;</span><span class="p">,</span> <span class="n">attrib</span><span class="p">),</span>
+            <span class="p">(</span><span class="s2">&quot;data&quot;</span><span class="p">,</span> <span class="n">data</span><span class="p">),</span>
+            <span class="p">(</span><span class="s2">&quot;tags&quot;</span><span class="p">,</span> <span class="n">tags</span><span class="p">),</span>
+            <span class="p">(</span><span class="s2">&quot;status&quot;</span><span class="p">,</span> <span class="n">status</span><span class="p">),</span>
+            <span class="p">(</span><span class="s2">&quot;active&quot;</span><span class="p">,</span> <span class="n">active</span><span class="p">),</span>
+        <span class="p">):</span>
+            <span class="k">if</span> <span class="n">value</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">create_data</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">create_entity</span><span class="p">(</span>
+            <span class="n">project_name</span><span class="p">,</span>
+            <span class="s2">&quot;representation&quot;</span><span class="p">,</span>
+            <span class="n">create_data</span>
+        <span class="p">)</span></div>
+
+<div class="viewcode-block" id="OperationsSession.update_representation"><a class="viewcode-back" href="../../ayon_api.operations.html#ayon_api.operations.OperationsSession.update_representation">[docs]</a>    <span class="k">def</span> <span class="nf">update_representation</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">project_name</span><span class="p">,</span>
+        <span class="n">representation_id</span><span class="p">,</span>
+        <span class="n">name</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">version_id</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">files</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">attrib</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">data</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">tags</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">status</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">active</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Update representation entity on server.</span>
+
+<span class="sd">        Update of ``data`` will override existing value on folder entity.</span>
+
+<span class="sd">        Update of ``attrib`` does change only passed attributes. If you want</span>
+<span class="sd">            to unset value, use ``None``.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            project_name (str): Project name.</span>
+<span class="sd">            representation_id (str): Representation id.</span>
+<span class="sd">            name (Optional[str]): New name.</span>
+<span class="sd">            version_id (Optional[str]): New version id.</span>
+<span class="sd">            files (Optional[list[dict]]): New files</span>
+<span class="sd">                information.</span>
+<span class="sd">            attrib (Optional[dict[str, Any]]): New attributes.</span>
+<span class="sd">            data (Optional[dict[str, Any]]): New data.</span>
+<span class="sd">            tags (Optional[Iterable[str]]): New tags.</span>
+<span class="sd">            status (Optional[str]): New status.</span>
+<span class="sd">            active (Optional[bool]): New active state.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            UpdateOperation: Object of update operation.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">update_data</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="p">(</span>
+            <span class="p">(</span><span class="s2">&quot;name&quot;</span><span class="p">,</span> <span class="n">name</span><span class="p">),</span>
+            <span class="p">(</span><span class="s2">&quot;versionId&quot;</span><span class="p">,</span> <span class="n">version_id</span><span class="p">),</span>
+            <span class="p">(</span><span class="s2">&quot;files&quot;</span><span class="p">,</span> <span class="n">files</span><span class="p">),</span>
+            <span class="p">(</span><span class="s2">&quot;attrib&quot;</span><span class="p">,</span> <span class="n">attrib</span><span class="p">),</span>
+            <span class="p">(</span><span class="s2">&quot;data&quot;</span><span class="p">,</span> <span class="n">data</span><span class="p">),</span>
+            <span class="p">(</span><span class="s2">&quot;tags&quot;</span><span class="p">,</span> <span class="n">tags</span><span class="p">),</span>
+            <span class="p">(</span><span class="s2">&quot;status&quot;</span><span class="p">,</span> <span class="n">status</span><span class="p">),</span>
+            <span class="p">(</span><span class="s2">&quot;active&quot;</span><span class="p">,</span> <span class="n">active</span><span class="p">),</span>
+        <span class="p">):</span>
+            <span class="k">if</span> <span class="n">value</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">update_data</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">update_entity</span><span class="p">(</span>
+            <span class="n">project_name</span><span class="p">,</span> <span class="s2">&quot;representation&quot;</span><span class="p">,</span> <span class="n">update_data</span>
+        <span class="p">)</span></div>
+
+<div class="viewcode-block" id="OperationsSession.delete_representation"><a class="viewcode-back" href="../../ayon_api.operations.html#ayon_api.operations.OperationsSession.delete_representation">[docs]</a>    <span class="k">def</span> <span class="nf">delete_representation</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">project_name</span><span class="p">,</span> <span class="n">representation_id</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Delete representation.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            project_name (str): Project name.</span>
+<span class="sd">            representation_id (str): Representation id to delete.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            DeleteOperation: Object of delete operation.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">delete_entity</span><span class="p">(</span>
+            <span class="n">project_name</span><span class="p">,</span> <span class="s2">&quot;representaion&quot;</span><span class="p">,</span> <span class="n">representation_id</span>
+        <span class="p">)</span></div></div>
+</pre></div>
+
+					 </div>
+					 
+					</div>
+					<footer>
+  
+
+  <div role="contentinfo">
+    <p>
+        
+        &copy; Copyright 2024, ynput.io <info@ynput.io>
+	  <br>
+      
+      
+      
+      Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+      
+      <a href="https://github.com/revitron/revitron-sphinx-theme">theme</a>
+      
+      provided by <a href="https://github.com/revitron">Revitron</a>.
+
+    </p>
+  </div> 
+
+</footer>
+
+				</div>
+			</div>
+
+		</section>
+
+	</div>
+	
+
+	<script type="text/javascript">
+			jQuery(function () {
+					SphinxRtdTheme.Navigation.enable(true);
+			});
+	</script>
+
+	
+	
+		
+	 
+
+ 
+</body>	
+</html>
